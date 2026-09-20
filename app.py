@@ -42,7 +42,6 @@ def buscar_columna(df, patrones):
     return None
 
 def match_departamento(depto_seq, deptos_eme_norm):
-    """Devuelve el departamento de la base de emergencia que mejor coincide."""
     d_seq_norm = normalizar_nombre(depto_seq)
     if not d_seq_norm:
         return None
@@ -60,7 +59,6 @@ def match_departamento(depto_seq, deptos_eme_norm):
 @st.cache_data
 def load_data():
     URL_SEQ = "https://raw.githubusercontent.com/emiliano2026/sequia/main/BBDD_sequia_mediana_v2.csv"
-    # ← ACTUALIZADO a la nueva base V2
     URL_EME = "https://raw.githubusercontent.com/emiliano2026/sequia/main/BBDD_todo_V2.csv"
 
     # ── Base de sequía (delimitador coma) ───────────────────────────
@@ -75,8 +73,9 @@ def load_data():
         if m:
             mapa_seq[c] = f"{m.group(1)}_{m.group(2)}"
     df_seq = df_seq.rename(columns=mapa_seq)
-    periodos_seq = sorted(mapa_seq.values(),
-                          key=lambda x: (int(x.split('_')[1]), x.split('_')[0]))
+
+    # ✅ RESPETAR EL ORDEN ORIGINAL DEL CSV (ya está en orden cronológico)
+    periodos_seq = list(mapa_seq.values())
 
     for p in periodos_seq:
         df_seq[p] = pd.to_numeric(df_seq[p], errors='coerce')
@@ -100,8 +99,9 @@ def load_data():
     df_eme.columns = df_eme.columns.str.strip()
 
     cols_eme = [c for c in df_eme.columns if re.match(r'^[A-Z]{3}_\d{4}$', c)]
-    periodos_eme = sorted(cols_eme,
-                          key=lambda x: (int(x.split('_')[1]), x.split('_')[0]))
+
+    # ✅ RESPETAR EL ORDEN ORIGINAL DEL CSV
+    periodos_eme = list(cols_eme)
 
     col_prov_eme = buscar_columna(df_eme, ['provincia'])
     col_dept_eme = buscar_columna(df_eme, ['departamento', 'nam', 'partido', 'municipio'])
@@ -110,7 +110,6 @@ def load_data():
     if not col_prov_eme or not col_dept_eme or not col_act_eme:
         st.error("❌ No se detectaron todas las columnas necesarias en BBDD_todo_V2.")
         st.write("**Columnas detectadas:**", list(df_eme.columns))
-        st.write("¿PROVINCIA?", col_prov_eme, "| ¿DEPARTAMENTO?", col_dept_eme, "| ¿ACTIVIDAD?", col_act_eme)
         st.stop()
 
     df_eme['PROVINCIA']    = df_eme[col_prov_eme].astype(str).str.strip()
@@ -119,8 +118,12 @@ def load_data():
     df_eme['_prov_norm']   = df_eme['PROVINCIA'].apply(normalizar_nombre)
     df_eme['_dept_norm']   = df_eme['DEPARTAMENTO'].apply(normalizar_nombre)
 
-    periodos_todos = sorted(set(periodos_seq) | set(periodos_eme),
-                            key=lambda x: (int(x.split('_')[1]), x.split('_')[0]))
+    # ✅ UNIÓN DE PERÍODOS PRESERVANDO ORDEN CRONOLÓGICO
+    # Primero los de sequía (en su orden), luego los de emergencia que no estén
+    periodos_todos = list(periodos_seq)
+    for p in periodos_eme:
+        if p not in periodos_todos:
+            periodos_todos.append(p)
 
     return df_seq, df_eme, periodos_seq, periodos_eme, periodos_todos
 
@@ -140,7 +143,7 @@ deptos = sorted(df_seq_prov['DEPARTAMENTO'].dropna().unique())
 depto_sel = st.sidebar.selectbox("🏘️ Departamento", deptos)
 depto_norm = normalizar_nombre(depto_sel)
 
-# ── CRUCE ROBUSTO CON LA BASE DE EMERGENCIA ─────────────────────
+# Cruce robusto
 mask_eme = (df_eme['_prov_norm'] == prov_norm) & (df_eme['_dept_norm'] == depto_norm)
 df_eme_depto = df_eme[mask_eme]
 
@@ -285,7 +288,7 @@ else:
         st.info("ℹ️ No hay resoluciones de emergencia para esta selección.")
 
 # ─────────────────────────────────────────────────────────────────────
-# EXPANDER DE DEPURACIÓN MEJORADO
+# EXPANDER DE DEPURACIÓN
 # ─────────────────────────────────────────────────────────────────────
 with st.expander("🔧 Ver datos crudos (diagnóstico del cruce)"):
     st.write("### Base de sequía")
@@ -307,5 +310,6 @@ with st.expander("🔧 Ver datos crudos (diagnóstico del cruce)"):
         st.write("Actividades detectadas:", sorted(df_eme_depto['ACTIVIDAD'].unique()))
 
     st.write("### Fechas")
-    st.write("**Períodos sequía:**", periodos_seq)
-    st.write("**Períodos emergencia:**", periodos_eme)
+    st.write(f"**Períodos sequía ({len(periodos_seq)}):**", periodos_seq)
+    st.write(f"**Períodos emergencia ({len(periodos_eme)}):**", periodos_eme)
+    st.write(f"**Períodos totales ({len(periodos_todos)}):**", periodos_todos)
