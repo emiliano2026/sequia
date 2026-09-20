@@ -1,0 +1,296 @@
+fid,gid,objeto,fna,gna,nam,in1,JUL2020_median,AGO2020_median,SEP2020_median,OCT2020_median,NOV2020_median,DIC2020_median,ENE2021_median,FEB2021_median,MAR2021_median,ABR2021_median,MAY2021_median,JUN2021_median,JUL2021_median,AGO2021_median,SEP2021_median,OCT2021_median,NOV2021_median,DIC2021_median,ENE2022_median,FEB2022_median,MAR2022_median,ABR2022_median,MAY2022_median,JUN2022_median,JUL2022_median,AGO2022_median,SEP2022_median,OCT2022_median,NOV2022_median,DIC2022_median,ENE2023_median,FEB2023_median,MAR2023_median,ABR2023_median,MAY2023_median,JUN2023_median
+1,1064,Departamento,Partido de Saladillo,Partido,Saladillo,06707,0,0,0,0,0,0,1,2,2,1,0,0,0,0,0,0,0,1,1,1,0,0,0,1,1,1,2,4,7,7,7,7,8,7,6,6
+2,1065,Departamento,Partido de Las Flores,Partido,Las Flores,06455,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,1,1,1,1,3,5,5,5,6,7,7,5,4
+3,1066,Departamento,Partido de Rojas,Partido,Rojas,06686,0,0,0,0,0,1,2,3,3,3,2,1,0,0,0,0,1,2,2,1,0,0,1,3,5,6,7,8,9,9,9,9,9,9,8,7
+4,1067,Departamento,Partido de Escobar,Partido,Escobar,06252,0,0,0,0,1,2,3,3,2,1,0,1,0,0,0,1,3,5,6,5,3,1,1,2,3,4,5,7,8,9,9,9,9,9,7,5
+5,1068,Departamento,Partido de José C. Paz,Partido,José C. Paz,06412,0,0,0,0,0,1,2,3,2,1,0,0,0,0,0,1,3,5,6,5,3,1,1,2,3,4,5,7,8,9,9,9,9,9,7,5
+6,1069,Departamento,Partido de San Antonio de Areco,Partido,San Antonio de Areco,06735,0,0,0,0,1,2,3,3,3,3,2,1,0,0,0,1,3,5,6,5,3,1,1,2,3,4,6,8,9,9,9,9,9,9,7,5
+7,1070,Departamento,Partido de Maipú,Partido,Maipú,06511,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,3,2,0,0,0,0,0,0,1,3,5,5,4,3,3,3,2,1
+8,1072,Departamento,Partido de Moreno,Partido,Moreno,06560,0,0,0,0,0,1,2,3,2,1,0,0,0,0,0,1,3,5,6,5,3,1,1,2,3,4,5,7,8,9,9,9,9,9,7,5
+9,1073,Departamento,Partido de La Matanza,Partido,La Matanza,06427,0,0,0,0,0,1,2,3,2,1,0,0,0,0,0,1,3,5,6,5,3,1,1,2,3,4,5,7,8,9,9,9,9,9,7,5
+10,1074,Departamento,Partido de General Paz,Partido,General Paz,06343,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,1,3,5,6,5,3,1,0,1,1,2,3,6,8,7,6,6,8,9,7,5
+11,1075,Departamento,Partido de General Guido,Partido,General Guido,06308,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,2,1,0,0,0,0,0,0,1,3,5,5,4,3,3,3,2,1
+12,1076,Departamento,Partido de General Juan Madariaga,Partido,General Juan Madariaga,06315,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,3,2,0,0,0,0,0,0,1,3,4,3,2,1,2,1,0,0
+13,1077,Departamento,Partido de Tandil,Partido,Tandil,06791,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,2,1,0,0,0,0,0,0,1,2,3,3,3,3,2,1,0,0
+14,1078,Departamento,Partido de Coronel Suárez,Partido,Coronel Suárez,06203,0,0,0,0,0,0,0,1,2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,3,4,3,2,0,0
+15,1079,Departamento,Partido de Adolfo Gonzales Chaves,Partido,Adolfo Gonzales Chaves,06014,0,0,0,0,0,0,0,1,2,2,1,0,0,0,0,0,1,2,2,1,0,0,0,0,0,0,1,2,3,3,4,5,4,2,0,0
+16,1080,Departamento,Partido de Bahía Blanca,Partido,Bahía Blanca,06056,0,0,0,0,0,0,0,1,2,3,2,1,1,2,3,3,3,3,3,3,2,1,0,0,0,0,0,0,0,1,2,3,2,1,0,0
+17,1081,Departamento,Partido de General Alvarado,Partido,General Alvarado,06280,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,1,3,3,2,0,0,0,0,0,0,0,1,2,2,2,1,1,0,0,0
+18,1082,Departamento,Partido de General Pueyrredón,Partido,General Pueyrredón,06357,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,1,3,3,2,0,0,0,0,0,0,0,1,2,2,2,1,1,0,0,0
+19,1083,Departamento,Partido de Mar Chiquita,Partido,Mar Chiquita,06518,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,1,3,3,2,0,0,0,0,0,0,1,3,4,3,2,1,1,0,0,0
+20,1084,Departamento,Partido de Villa Gesell,Partido,Villa Gesell,06868,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,3,2,0,0,0,0,0,0,0,2,2,2,1,1,1,0,0,0
+21,1085,Departamento,Partido de Pinamar,Partido,Pinamar,06644,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,3,2,0,0,0,0,0,0,0,2,2,2,1,1,2,2,2,1
+22,1086,Departamento,Partido de General Lavalle,Partido,General Lavalle,06336,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,3,2,0,0,0,0,0,0,0,2,3,3,2,2,3,3,2,1
+23,1087,Departamento,Partido de La Costa,Partido,La Costa,06420,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,3,2,0,0,0,0,0,0,0,2,3,3,1,0,1,2,2,1
+24,1088,Departamento,Partido de Magdalena,Partido,Magdalena,06505,0,0,0,0,0,1,2,2,1,0,0,0,0,0,0,1,3,5,6,5,3,1,0,1,1,3,4,7,8,8,7,7,8,9,7,5
+25,1089,Departamento,Partido de Vicente López,Partido,Vicente López,06861,0,0,0,0,0,1,2,3,2,1,0,0,0,0,0,1,3,5,6,5,3,1,1,2,3,4,5,7,8,9,9,9,9,9,7,5
+26,1096,Departamento,Partido de Rauch,Partido,Rauch,06672,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,1,3,5,5,4,3,4,5,5,4
+27,1097,Departamento,Partido de Salliqueló,Partido,Salliqueló,06721,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,3,3,3,3,4,4,4,4,5
+28,1098,Departamento,Partido de Berazategui,Partido,Berazategui,06091,0,0,0,0,0,1,2,2,1,0,0,0,0,0,0,1,3,5,6,5,3,1,0,1,1,3,4,7,8,9,9,9,9,9,7,5
+29,1099,Departamento,Partido de Tornquist,Partido,Tornquist,06819,0,0,0,0,0,0,0,1,2,3,2,1,1,1,1,1,2,3,3,2,1,0,0,0,0,0,0,0,0,1,2,3,2,1,0,0
+30,1100,Departamento,Partido de Coronel Pringles,Partido,Coronel Pringles,06196,0,0,0,0,0,0,0,1,2,2,1,0,0,0,0,0,1,2,2,1,0,0,0,0,0,0,0,1,2,3,3,4,3,2,0,0
+31,1101,Departamento,Partido de General Pinto,Partido,General Pinto,06351,0,0,0,0,1,2,3,3,3,3,2,1,0,0,0,0,0,0,0,0,0,0,0,1,3,5,7,8,9,8,8,8,9,9,9,9
+32,1102,Departamento,Partido de San Cayetano,Partido,San Cayetano,06742,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,3,2,1,0,0,0,0,1,2,3,3,4,5,4,2,0,0
+33,1103,Departamento,Partido de Tres Arroyos,Partido,Tres Arroyos,06833,0,0,0,0,0,0,0,1,2,2,1,0,0,0,0,0,1,2,3,3,2,1,0,0,0,0,1,2,3,3,3,3,2,1,0,0
+34,1104,Departamento,Partido de Coronel Dorrego,Partido,Coronel Dorrego,06189,0,0,0,0,0,0,0,1,2,3,2,1,0,0,0,0,1,2,3,3,2,1,0,0,0,0,0,1,2,3,3,3,2,1,0,0
+35,1105,Departamento,Partido de Necochea,Partido,Necochea,06581,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,3,2,0,0,0,0,0,0,1,2,3,3,4,5,4,2,0,0
+36,1110,Departamento,Partido de Lezama,Partido,Lezama,06466,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,5,4,2,0,0,0,1,1,1,2,4,7,6,6,6,8,8,6,4
+37,1111,Departamento,Partido de Chascomús,Partido,Chascomús,06218,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,1,3,5,6,5,3,1,0,1,1,2,3,5,7,6,6,6,8,8,6,4
+38,1112,Departamento,Partido de Punta Indio,Partido,Punta Indio,06655,0,0,0,0,0,1,2,2,1,0,0,0,0,0,0,1,3,5,6,5,3,1,0,1,1,2,3,6,8,7,6,6,8,9,7,5
+39,1114,Departamento,Partido de Campana,Partido,Campana,06126,0,0,0,0,1,2,3,3,3,3,2,3,5,6,6,5,4,4,5,6,5,4,2,2,2,4,6,8,9,9,9,9,9,9,7,5
+44,1130,Departamento,Partido de Adolfo Alsina,Partido,Adolfo Alsina,06007,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,2,2,2,3,3,2,2,2
+45,1131,Departamento,Partido de Pellegrini,Partido,Pellegrini,06616,0,0,0,0,0,0,0,1,2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,3,3,3,3,3,4,5,6,6,6
+46,1132,Departamento,Partido de Puán,Partido,Puán,06651,0,0,0,0,0,0,0,1,2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,2,1,0
+47,1133,Departamento,Partido de Villarino,Partido,Villarino,06875,0,0,0,0,0,0,0,1,2,3,3,3,3,3,3,3,3,3,3,2,1,0,0,0,0,0,0,0,0,0,0,0,1,2,3,3
+48,1134,Departamento,Partido de General Villegas,Partido,General Villegas,06392,0,1,2,3,3,5,4,3,1,2,1,1,0,0,0,0,0,0,0,0,0,0,1,2,4,5,6,6,6,6,6,6,7,8,9,9
+56,1159,Departamento,Partido de Pergamino,Partido,Pergamino,06623,0,1,2,3,3,4,5,6,5,4,2,1,0,0,0,1,3,5,4,3,1,1,0,2,4,6,7,8,9,9,9,9,9,9,7,5
+65,1199,Departamento,Partido de Castelli,Partido,Castelli,06168,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,3,2,0,0,0,1,1,1,1,3,6,6,6,6,7,7,5,4
+66,1200,Departamento,Partido de Almirante Brown,Partido,Almirante Brown,06028,0,0,0,0,0,1,2,3,2,1,0,0,0,0,0,1,3,5,6,5,3,1,0,1,2,4,5,7,8,9,9,9,9,9,7,5
+67,1201,Departamento,Partido de Presidente Perón,Partido,Presidente Perón,06648,0,0,0,0,0,1,2,3,2,1,0,0,0,0,0,1,3,5,6,5,3,1,0,1,1,3,4,7,8,9,9,9,9,9,7,5
+68,1202,Departamento,Partido de Brandsen,Partido,Brandsen,06119,0,0,0,0,0,1,2,2,1,0,0,0,0,0,0,1,3,5,6,5,3,1,0,1,1,2,3,6,8,8,8,8,9,9,7,5
+69,1203,Departamento,Partido de Carlos Casares,Partido,Carlos Casares,06147,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,4,5,6,5,5,5,6,6,7,8
+70,1204,Departamento,Partido de Carlos Tejedor,Partido,Carlos Tejedor,06154,0,0,0,0,0,1,2,3,3,3,2,1,0,0,0,0,0,0,0,0,0,0,0,1,2,3,3,4,5,5,5,5,7,8,9,9
+71,1205,Departamento,Partido de 25 de Mayo,Partido,25 de Mayo,06854,0,0,0,0,0,0,0,1,2,2,1,0,0,0,0,0,0,1,1,1,0,0,0,1,2,3,4,5,7,7,7,7,8,9,9,9
+72,1206,Departamento,Partido de 9 de Julio,Partido,9 de Julio,06588,0,0,0,0,0,0,1,2,3,3,2,1,0,0,0,0,0,0,0,0,0,0,0,1,2,3,4,6,8,8,7,7,8,9,9,9
+73,1207,Departamento,Partido de Pehuajó,Partido,Pehuajó,06609,0,0,0,0,0,1,2,3,3,2,1,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,3,4,5,5,4,3,4,5,7,8
+74,1208,Departamento,Partido de Trenque Lauquen,Partido,Trenque Lauquen,06826,0,0,0,0,0,0,0,1,2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,3,4,4,4,3,4,5,6,7,8
+75,1209,Departamento,Partido de General Belgrano,Partido,General Belgrano,06301,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,2,1,0,0,0,1,1,1,2,4,7,6,6,6,8,8,6,4
+76,1210,Departamento,Partido de Monte,Partido,Monte,06547,0,0,0,0,0,1,1,2,1,0,0,0,0,0,0,0,1,2,2,1,0,0,0,1,1,1,2,4,7,7,8,8,9,9,7,5
+77,1211,Departamento,Partido de Roque Pérez,Partido,Roque Pérez,06693,0,0,0,0,0,0,1,2,2,1,0,0,0,0,0,0,1,2,2,1,0,0,0,1,1,1,2,4,7,8,9,9,9,9,7,5
+78,1212,Departamento,Partido de Olavarría,Partido,Olavarría,06595,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,5,5,4,3,3,3,3,3
+79,1213,Departamento,Partido de Merlo,Partido,Merlo,06539,0,0,0,0,0,1,2,3,2,1,0,0,0,0,0,1,3,5,6,5,3,1,1,2,3,4,5,7,8,9,9,9,9,9,7,5
+80,1214,Departamento,Partido de Esteban Echeverría,Partido,Esteban Echeverría,06260,0,0,0,0,0,1,2,3,2,1,0,0,0,0,0,1,3,5,6,5,3,1,1,2,3,4,5,7,8,9,9,9,9,9,7,5
+81,1215,Departamento,Partido de Arrecifes,Partido,Arrecifes,06077,0,0,0,0,1,2,3,3,3,3,2,1,0,0,0,1,3,5,4,3,1,1,1,2,4,5,6,8,9,9,9,9,9,9,7,5
+82,1216,Departamento,Partido de Capitán Sarmiento,Partido,Capitán Sarmiento,06140,0,0,0,0,1,2,3,3,3,3,2,1,0,0,0,1,3,5,4,2,0,0,1,2,3,4,6,8,9,9,9,9,9,9,7,5
+83,1217,Departamento,Partido de Carmen de Areco,Partido,Carmen de Areco,06161,0,0,0,0,0,1,2,3,3,3,2,1,0,0,0,1,3,5,4,2,0,0,1,2,3,4,6,8,9,9,9,9,9,9,7,5
+84,1218,Departamento,Partido de Salto,Partido,Salto,06714,0,0,0,0,0,1,2,3,3,3,2,1,0,0,0,0,1,2,2,1,0,0,1,3,5,6,7,8,9,9,9,9,9,9,8,7
+85,1219,Departamento,Partido de Exaltación de la Cruz,Partido,Exaltación de la Cruz,06266,0,0,0,0,1,2,3,3,3,3,2,1,0,0,0,1,3,5,6,5,3,1,1,2,3,4,6,8,9,9,9,9,9,9,7,5
+86,1220,Departamento,Partido de San Miguel,Partido,San Miguel,06760,0,0,0,0,0,1,2,3,2,1,0,0,0,0,0,1,3,5,6,5,3,1,1,2,3,4,5,7,8,9,9,9,9,9,7,5
+87,1221,Departamento,Partido de San Andrés de Giles,Partido,San Andrés de Giles,06728,0,0,0,0,0,1,2,3,3,3,2,1,0,0,0,1,3,5,4,2,0,0,1,2,3,4,6,8,9,9,9,9,9,9,7,5
+88,1222,Departamento,Partido de Junín,Partido,Junín,06413,0,0,0,0,0,1,2,3,3,3,2,1,0,0,0,0,0,0,0,0,0,0,1,3,5,6,7,8,9,8,8,8,9,9,8,7
+89,1223,Departamento,Partido de Mercedes,Partido,Mercedes,06532,0,0,0,0,0,1,2,3,3,3,2,1,0,0,0,1,3,5,4,2,0,0,1,2,3,4,6,8,9,9,9,9,9,9,7,5
+90,1224,Departamento,Partido de Pilar,Partido,Pilar,06638,0,0,0,0,1,2,3,3,3,2,1,0,0,0,0,1,3,5,6,5,3,1,1,2,3,4,6,8,9,9,9,9,9,9,7,5
+91,1225,Departamento,Partido de Luján,Partido,Luján,06497,0,0,0,0,0,1,2,3,3,3,2,1,0,0,0,1,3,5,6,5,3,1,1,2,3,4,6,8,9,9,9,9,9,9,7,5
+92,1226,Departamento,Partido de Hurlingham,Partido,Hurlingham,06408,0,0,0,0,0,1,2,3,2,1,0,0,0,0,0,1,3,5,6,5,3,1,1,2,3,4,5,7,8,9,9,9,9,9,7,5
+93,1227,Departamento,Partido de Morón,Partido,Morón,06568,0,0,0,0,0,1,2,3,2,1,0,0,0,0,0,1,3,5,6,5,3,1,1,2,3,4,5,7,8,9,9,9,9,9,7,5
+94,1228,Departamento,Partido de Chacabuco,Partido,Chacabuco,06210,0,0,0,0,0,1,2,3,3,3,2,1,0,0,0,0,1,2,2,1,0,0,1,2,3,4,6,8,9,9,9,9,9,9,8,7
+95,1229,Departamento,Partido de Malvinas Argentinas,Partido,Malvinas Argentinas,06515,0,0,0,0,0,1,2,3,2,1,0,0,0,0,0,1,3,5,6,5,3,1,1,2,3,4,5,7,8,9,9,9,9,9,7,5
+96,1230,Departamento,Partido General San Martín,Partido,General San Martín,06371,0,0,0,0,0,1,2,3,2,1,0,0,0,0,0,1,3,5,6,5,3,1,1,2,3,4,5,7,8,9,9,9,9,9,7,5
+97,1231,Departamento,Partido de Lincoln,Partido,Lincoln,06469,0,0,0,0,0,1,2,3,3,3,2,1,0,0,0,0,0,0,0,0,0,0,0,1,2,3,5,7,9,8,8,8,9,9,9,9
+98,1232,Departamento,Partido de Ituzaingó,Partido,Ituzaingó,06410,0,0,0,0,0,1,2,3,2,1,0,0,0,0,0,1,3,5,6,5,3,1,1,2,3,4,5,7,8,9,9,9,9,9,7,5
+99,1233,Departamento,Partido de General Rodríguez,Partido,General Rodríguez,06364,0,0,0,0,0,1,2,3,3,2,1,0,0,0,0,1,3,5,6,5,3,1,1,2,3,4,5,7,8,9,9,9,9,9,7,5
+100,1234,Departamento,Partido de Suipacha,Partido,Suipacha,06784,0,0,0,0,0,1,2,3,3,3,2,1,0,0,0,1,3,5,4,2,0,0,1,2,3,4,6,8,9,9,9,9,9,9,8,7
+101,1235,Departamento,Partido de Tres de Febrero,Partido,Tres de Febrero,06840,0,0,0,0,0,1,2,3,2,1,0,0,0,0,0,1,3,5,6,5,3,1,1,2,3,4,5,7,8,9,9,9,9,9,7,5
+102,1237,Departamento,Partido de Chivilcoy,Partido,Chivilcoy,06224,0,0,0,0,0,1,2,3,3,3,2,1,0,0,0,0,1,2,2,1,0,0,0,1,2,4,6,8,9,9,9,9,9,9,8,7
+103,1238,Departamento,Partido de Alberti,Partido,Alberti,06021,0,0,0,0,0,1,2,3,3,3,2,1,0,0,0,0,1,2,2,1,0,0,0,1,2,3,5,7,9,8,8,8,9,9,8,7
+104,1239,Departamento,Partido de Bragado,Partido,Bragado,06112,0,0,0,0,0,1,2,3,3,3,2,1,0,0,0,0,0,1,1,1,0,0,0,1,2,3,4,6,8,8,8,8,9,9,9,9
+105,1240,Departamento,Partido de General Las Heras,Partido,General Las Heras,06329,0,0,0,0,0,1,2,3,2,1,0,0,0,0,0,1,3,5,4,2,0,0,1,2,3,4,6,8,9,9,9,9,9,9,7,5
+106,1241,Departamento,Partido de Marcos Paz,Partido,Marcos Paz,06525,0,0,0,0,0,1,2,3,2,1,0,0,0,0,0,1,3,5,6,5,3,1,1,2,3,4,5,7,8,9,9,9,9,9,7,5
+107,1242,Departamento,Partido de General Viamonte,Partido,General Viamonte,06385,0,0,0,0,0,1,2,3,3,3,2,1,0,0,0,0,0,0,0,0,0,0,0,1,2,3,5,7,9,8,8,8,9,9,9,9
+108,1243,Departamento,Partido de Ezeiza,Partido,Ezeiza,06270,0,0,0,0,0,1,2,3,2,1,0,0,0,0,0,1,3,5,6,5,3,1,1,2,3,4,5,7,8,9,9,9,9,9,7,5
+109,1244,Departamento,Partido de Florencio Varela,Partido,Florencio Varela,06274,0,0,0,0,0,1,2,2,1,0,0,0,0,0,0,1,3,5,6,5,3,1,0,1,1,3,4,7,8,9,9,9,9,9,7,5
+110,1245,Departamento,Partido de Navarro,Partido,Navarro,06574,0,0,0,0,0,1,2,3,3,2,1,0,0,0,0,1,3,5,4,2,0,0,0,1,2,4,6,8,9,9,9,9,9,9,7,5
+111,1246,Departamento,Partido de Cañuelas,Partido,Cañuelas,06134,0,0,0,0,0,1,2,3,2,1,0,0,0,0,0,1,3,5,6,5,3,1,0,1,1,3,4,7,8,9,9,9,9,9,7,5
+112,1247,Departamento,Partido de San Vicente,Partido,San Vicente,06778,0,0,0,0,0,1,2,2,1,0,0,0,0,0,0,1,3,5,6,5,3,1,0,1,1,3,4,7,8,9,9,9,9,9,7,5
+113,1248,Departamento,Partido de Lobos,Partido,Lobos,06483,0,0,0,0,0,1,2,3,2,1,0,0,0,0,0,0,1,2,2,1,0,0,0,1,2,3,4,6,8,9,9,9,9,9,7,5
+114,1249,Departamento,Partido de General Alvear,Partido,General Alvear,06287,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,3,5,5,5,6,7,7,6,6
+115,1250,Departamento,Partido de Quilmes,Partido,Quilmes,06658,0,0,0,0,0,1,2,3,2,1,0,0,0,0,0,1,3,5,6,5,3,1,0,1,2,4,5,7,8,9,9,9,9,9,7,5
+116,1251,Departamento,Partido de General La Madrid,Partido,General La Madrid,06322,0,0,0,0,0,0,0,1,2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,3,4,3,2,0,0
+117,1252,Departamento,Partido de Bolívar,Partido,Bolívar,06105,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,5,5,4,3,3,3,4,5
+118,1253,Departamento,Partido de Balcarce,Partido,Balcarce,06063,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,1,3,3,2,0,0,0,0,0,0,0,2,3,3,2,2,2,1,0,0
+119,1254,Departamento,Partido de Tapalqué,Partido,Tapalqué,06798,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,5,5,5,5,5,4,3,3
+120,1255,Departamento,Partido de Hipólito Yrigoyen,Partido,Hipólito Yrigoyen,06406,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,5,5,4,3,3,3,4,5
+121,1256,Departamento,Partido de Dolores,Partido,Dolores,06238,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,3,2,0,0,0,1,1,1,1,3,5,5,4,4,5,6,5,4
+122,1257,Departamento,Partido de Azul,Partido,Azul,06049,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,1,3,5,5,4,3,2,1,1,1
+123,1258,Departamento,Partido de Daireaux,Partido,Daireaux,06231,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,4,4,3,4,4,4,4,5
+124,1259,Departamento,Partido de Tres Lomas,Partido,Tres Lomas,06847,0,0,0,0,0,0,0,1,2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,3,3,3,3,3,4,5,6,6,6
+125,1260,Departamento,Partido de Ayacucho,Partido,Ayacucho,06042,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,2,1,0,0,0,0,0,0,1,3,5,5,4,3,2,1,0,0
+126,1261,Departamento,Partido de Guaminí,Partido,Guaminí,06399,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,3,3,3,4,4,4,4,5
+127,1262,Departamento,Partido de Ensenada,Partido,Ensenada,06245,0,0,0,0,0,1,2,2,1,0,0,0,0,0,0,1,3,5,6,5,3,1,0,1,1,3,4,7,8,9,9,9,9,9,7,5
+128,1263,Departamento,Partido de Laprida,Partido,Laprida,06448,0,0,0,0,0,0,0,1,2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,3,4,3,2,0,0
+129,1264,Departamento,Partido de San Isidro,Partido,San Isidro,06756,0,0,0,0,0,1,2,3,2,1,0,0,0,0,0,1,3,5,6,5,3,1,1,2,3,4,5,7,8,9,9,9,9,9,7,5
+130,1265,Departamento,Partido de Benito Juárez,Partido,Benito Juárez,06084,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,2,1,0,0,0,0,0,0,1,2,3,3,3,4,3,2,0,0
+131,1266,Departamento,Partido de Colón,Partido,Colón,06175,0,1,2,3,3,4,5,6,5,4,2,1,0,0,0,0,1,2,2,1,0,0,1,2,4,5,7,8,9,9,9,9,9,9,7,5
+132,1268,Departamento,Partido de Saavedra,Partido,Saavedra,06700,0,0,0,0,0,0,0,1,2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,2,2,3,3,2,1,0
+133,1269,Departamento,Partido de Monte Hermoso,Partido,Monte Hermoso,06553,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,1,2,2,2,2,2,1,0,0,0,0,0,1,2,3,3,2,1,0,0
+134,1270,Departamento,Partido de Lobería,Partido,Lobería,06476,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,3,2,0,0,0,0,0,0,0,1,2,3,3,3,2,1,0,0
+135,1271,Departamento,Partido de Berisso,Partido,Berisso,06098,0,0,0,0,0,1,2,2,1,0,0,0,0,0,0,1,3,5,6,5,3,1,0,1,1,3,4,7,8,8,8,8,9,9,7,5
+136,1272,Departamento,Partido de Tordillo,Partido,Tordillo,06812,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,3,2,0,0,0,1,1,1,0,2,4,5,4,4,4,4,2,1
+137,1273,Departamento,Partido de Zárate,Partido,Zárate,06882,0,0,0,0,1,2,3,3,3,3,2,3,4,6,6,5,4,4,5,6,5,4,2,2,2,4,6,8,9,9,9,9,9,9,7,5
+138,1274,Departamento,Partido de Ramallo,Partido,Ramallo,06665,0,1,2,3,3,4,5,6,5,4,2,1,0,0,0,1,3,5,6,5,3,1,0,1,2,4,6,8,9,9,9,9,9,9,7,5
+139,1275,Departamento,Partido de San Nicolás,Partido,San Nicolás,06763,0,1,2,3,3,4,5,6,5,4,2,1,0,0,0,1,3,5,6,6,4,2,0,1,3,5,7,8,9,9,9,9,9,9,7,5
+140,1294,Departamento,Partido de Leandro N. Alem,Partido,Leandro N. Alem,06462,0,0,0,0,1,2,4,6,5,4,2,1,0,0,0,0,0,0,0,0,0,0,1,2,4,5,7,8,9,8,8,8,9,9,9,9
+141,1296,Departamento,Partido de General Arenales,Partido,General Arenales,06294,0,1,2,3,3,4,5,6,5,4,2,1,0,0,0,0,0,0,0,0,0,0,1,2,4,5,7,8,9,8,8,8,9,9,8,7
+142,1298,Departamento,Partido de Patagones,Partido,Patagones,06602,0,0,0,0,0,0,0,1,2,3,3,3,3,3,4,5,6,6,4,2,0,0,0,0,0,1,1,1,0,0,0,0,1,2,3,3
+144,1303,Departamento,Partido de Coronel de Marina Leonardo Rosales,Partido,Coronel de Marina Leonardo Rosales,06182,0,0,0,0,0,0,0,1,2,3,2,1,1,1,1,0,1,2,3,3,3,2,1,0,0,0,0,0,0,1,2,3,2,1,0,0
+145,1304,Departamento,Partido de Baradero,Partido,Baradero,06070,0,0,0,0,1,2,3,3,3,3,2,1,0,0,0,1,3,5,6,5,3,1,1,1,2,4,6,8,9,9,9,9,9,9,7,5
+146,1305,Departamento,Partido de San Pedro,Partido,San Pedro,06770,0,1,2,3,3,3,5,6,5,4,2,1,0,0,0,1,3,5,6,5,3,1,0,1,2,4,6,8,9,9,9,9,9,9,7,5
+147,1313,Departamento,Partido de Florentino Ameghino,Partido,Florentino Ameghino,06277,0,0,0,0,1,2,3,3,3,3,2,1,0,0,0,0,0,0,0,0,0,0,0,1,3,5,6,7,9,8,7,6,7,8,9,9
+148,1320,Departamento,Partido de Lanús,Partido,Lanús,06434,0,0,0,0,0,1,2,3,2,1,0,0,0,0,0,1,3,5,6,5,3,1,1,2,3,4,5,7,8,9,9,9,9,9,7,5
+149,1321,Departamento,Partido de Lomas de Zamora,Partido,Lomas de Zamora,06490,0,0,0,0,0,1,2,3,2,1,0,0,0,0,0,1,3,5,6,5,3,1,1,2,3,4,5,7,8,9,9,9,9,9,7,5
+150,1322,Departamento,Partido de Avellaneda,Partido,Avellaneda,06035,0,0,0,0,0,1,2,3,2,1,0,0,0,0,0,1,3,5,6,5,3,1,1,2,3,4,5,7,8,9,9,9,9,9,7,5
+152,1329,Departamento,Partido de La Plata,Partido,La Plata,06441,0,0,0,0,0,1,2,2,1,0,0,0,0,0,0,1,3,5,6,5,3,1,0,1,1,3,4,7,8,8,8,8,9,9,7,5
+153,1346,Departamento,Partido de Pila,Partido,Pila,06630,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,2,1,0,0,0,1,1,1,1,3,5,5,5,6,7,7,5,4
+154,1369,Departamento,Departamento Victoria,Departamento,Victoria,30105,1,3,5,6,6,6,6,6,5,4,2,3,4,6,6,5,4,4,5,6,5,4,2,2,2,4,6,8,9,9,9,9,8,7,5,4
+155,1370,Departamento,Departamento Gualeguay,Departamento,Gualeguay,30049,0,1,2,3,3,4,5,6,5,4,2,3,4,6,6,5,4,4,5,6,5,4,2,1,0,2,5,8,9,9,9,9,8,7,5,4
+162,1425,Departamento,Departamento Constitución,Departamento,Constitución,82028,0,1,2,3,3,4,5,6,5,4,2,1,0,0,0,1,3,5,4,4,3,3,1,1,3,5,6,8,9,9,9,9,9,9,7,5
+163,1426,Departamento,Departamento Rosario,Departamento,Rosario,82084,0,1,2,3,3,4,5,6,5,4,2,1,0,0,0,1,3,5,6,6,5,3,1,1,3,5,6,8,9,9,9,9,8,7,5,4
+164,1427,Departamento,Departamento Iriondo,Departamento,Iriondo,82056,1,3,5,6,6,6,5,6,5,3,1,0,0,0,0,1,3,5,6,6,5,3,1,1,3,5,6,7,8,9,9,9,8,8,6,5
+165,1431,Departamento,Departamento Caleu Caleu,Departamento,Caleu Caleu,42014,0,0,0,0,0,0,0,1,2,3,3,3,3,3,3,3,3,3,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2
+166,1433,Departamento,Departamento Chapaleufú,Departamento,Chapaleufú,42056,0,0,1,3,4,5,4,3,2,2,1,0,0,0,0,0,0,0,0,0,0,0,1,2,4,5,6,6,5,4,3,4,5,6,7,8
+167,1434,Departamento,Departamento Rancul,Departamento,Rancul,42126,0,0,1,2,3,3,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,5,6,6,5,4,3,3,3,3,3,4
+168,1435,Departamento,Departamento Lihuel Calel,Departamento,Lihuel Calel,42084,0,0,0,0,0,0,0,0,1,2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
+169,1436,Departamento,Departamento Hucal,Departamento,Hucal,42077,0,0,0,0,0,0,0,1,2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+170,1437,Departamento,Departamento Limay Mahuida,Departamento,Limay Mahuida,42091,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+171,1438,Departamento,Departamento Guatraché,Departamento,Guatraché,42070,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,2,2,1,1,0,0,0,0
+172,1439,Departamento,Departamento Maracó,Departamento,Maracó,42105,0,0,0,1,3,5,4,3,2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,3,4,4,4,3,4,5,6,7,8
+173,1440,Departamento,Departamento Realicó,Departamento,Realicó,42133,0,0,1,3,4,4,2,2,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,2,4,5,6,6,5,4,3,4,5,6,7,8
+174,1441,Departamento,Departamento Utracán,Departamento,Utracán,42154,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+175,1442,Departamento,Departamento Toay,Departamento,Toay,42140,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,2,2,2,3,2,1,0,0
+176,1443,Departamento,Departamento Capital,Departamento,Capital,42021,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,3,2,2,2,3,3,3,3,3
+177,1444,Departamento,Departamento Trenel,Departamento,Trenel,42147,0,0,1,2,3,3,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,5,6,6,5,4,3,4,4,5,5,7
+178,1447,Departamento,Departamento Conhelo,Departamento,Conhelo,42035,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,3,3,3,3,3,3,3,3,4,5
+179,1448,Departamento,Departamento Loventué,Departamento,Loventué,42098,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,3,2,2,2,3,2,1,0,0
+180,1450,Departamento,Partido de San Fernando,Partido,San Fernando,06749,0,0,0,0,1,3,3,2,0,0,1,3,5,6,6,5,4,4,5,6,5,4,2,2,2,4,5,7,8,9,9,9,9,9,7,5
+181,1451,Departamento,Partido de Tigre,Partido,Tigre,06805,0,0,0,0,1,2,3,3,2,1,0,2,4,6,6,5,4,4,5,6,5,4,2,2,3,4,5,7,8,9,9,9,9,9,7,5
+182,1456,Departamento,Partido de Rivadavia,Partido,Rivadavia,06679,0,0,0,1,2,3,3,3,2,3,2,1,0,0,0,0,0,0,0,0,0,0,0,1,2,3,3,4,4,4,3,4,5,6,7,8
+183,1463,Departamento,Departamento General López,Departamento,General López,82042,0,1,2,3,3,4,5,6,5,3,1,0,0,0,0,0,0,0,0,0,0,0,1,2,4,5,6,7,8,8,9,9,9,9,8,7
+184,1464,Departamento,Departamento Caseros,Departamento,Caseros,82014,0,1,2,3,3,4,5,6,5,3,1,0,0,0,0,1,1,1,0,2,3,3,2,2,4,5,6,7,8,9,9,9,8,8,6,5
+185,1465,Departamento,Departamento San Lorenzo,Departamento,San Lorenzo,82119,0,1,2,3,3,4,5,6,5,3,1,0,0,0,0,1,3,5,6,6,5,3,1,1,3,5,6,7,8,9,9,9,8,8,6,5
+186,1471,Departamento,Departamento Atreucó,Departamento,Atreucó,42007,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,2,2,2,3,3,2,2,2
+187,1472,Departamento,Departamento Catriló,Departamento,Catriló,42028,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,3,2,2,2,3,3,3,4,5
+188,1473,Departamento,Departamento Quemú Quemú,Departamento,Quemú Quemú,42119,0,0,0,0,0,0,0,1,2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,3,3,3,3,3,4,5,6,6,6
+189,1474,Departamento,Departamento Curacó,Departamento,Curacó,42042,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1
+190,1477,Departamento,Departamento Belgrano,Departamento,Belgrano,82007,1,3,5,6,6,6,6,6,5,3,1,0,0,0,0,1,1,2,1,3,2,2,1,2,4,5,6,7,8,9,9,9,8,8,6,5
+191,1497,Departamento,Departamento Islas del Ibicuy,Departamento,Islas del Ibicuy,30063,1,3,5,6,6,6,6,6,5,4,3,4,5,6,6,5,4,4,5,6,5,4,2,1,0,2,5,8,9,9,9,9,9,8,6,4
+192,1498,Departamento,Departamento Uruguay,Departamento,Uruguay,30098,0,0,0,1,2,4,3,4,3,3,1,0,0,0,0,0,1,2,4,4,3,1,0,0,0,0,1,3,5,6,7,8,8,7,5,3
+193,1500,Departamento,Departamento Gualeguaychú,Departamento,Gualeguaychú,30056,0,0,1,2,3,4,5,6,5,3,2,1,1,0,0,0,1,2,4,4,3,1,0,0,0,0,2,4,6,6,7,8,8,7,5,4
+194,1535,Departamento,Departamento Unión,Departamento,Unión,14182,1,3,5,6,6,5,3,1,0,0,0,0,0,0,0,0,0,1,1,3,3,3,2,2,4,5,6,6,7,8,8,8,7,8,7,7
+195,1536,Departamento,Departamento Tercero Arriba,Departamento,Tercero Arriba,14161,4,5,6,6,6,5,3,1,0,0,0,0,0,0,0,0,0,1,1,3,4,5,5,5,6,6,6,7,7,8,7,7,5,4,3,3
+196,1537,Departamento,Departamento Río Cuarto,Departamento,Río Cuarto,14098,4,5,6,6,5,4,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,5,6,6,6,7,7,7,6,6,4,2,0,0
+197,1538,Departamento,Departamento Presidente Roque Sáenz Peña,Departamento,Presidente Roque Sáenz Peña,14084,0,2,4,6,5,4,2,1,0,1,1,1,0,0,0,0,0,0,0,0,0,0,1,2,4,5,6,6,6,6,6,6,6,6,6,8
+198,1539,Departamento,Departamento General Roca,Departamento,General Roca,14035,0,1,2,4,4,4,2,2,1,2,1,1,0,0,0,0,0,0,0,0,0,0,1,2,4,5,6,6,6,6,6,6,5,5,5,6
+199,1543,Departamento,Departamento Juárez Celman,Departamento,Juárez Celman,14056,3,5,6,6,6,5,3,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,3,4,5,6,6,6,6,6,6,5,4,4,5
+200,1547,Departamento,Departamento General San Martín,Departamento,General San Martín,14042,2,4,6,6,6,5,3,1,0,0,0,0,0,0,0,0,0,1,1,3,4,5,4,3,4,5,6,7,8,9,8,7,6,6,6,6
+201,1550,Departamento,Departamento Marcos Juárez,Departamento,Marcos Juárez,14063,1,3,5,6,6,6,4,3,1,1,0,0,0,0,0,0,0,0,0,2,3,3,2,2,4,5,6,6,7,8,9,9,8,8,7,7
+269,1071,Departamento,Departamento O'Higgins,Departamento,O'Higgins,22112,2,4,5,6,6,6,6,6,5,3,1,0,0,0,0,1,1,1,0,1,1,1,0,0,0,0,0,1,3,5,7,8,9,8,7,6
+276,1119,Departamento,Departamento 12 de Octubre,Departamento,12 de Octubre,22036,2,4,5,6,6,6,6,6,5,3,1,0,0,0,0,1,1,1,0,1,1,1,1,2,3,3,3,4,5,6,7,8,8,7,5,4
+277,1120,Departamento,Departamento Pilagás,Departamento,Pilagás,34042,5,6,6,6,5,4,2,1,0,0,0,0,1,2,3,3,3,4,6,8,8,5,3,0,1,3,5,5,3,1,1,3,6,7,6,4
+278,1121,Departamento,Departamento Laishi,Departamento,Laishi,34021,4,4,4,5,5,4,2,1,0,0,1,1,2,3,3,3,3,4,6,8,8,6,3,2,1,2,2,1,0,1,2,4,6,7,6,4
+279,1122,Departamento,Departamento Pirané,Departamento,Pirané,34056,5,6,6,6,5,4,2,1,0,0,0,0,1,2,3,3,3,4,6,8,9,6,3,0,1,2,2,2,1,2,2,4,6,7,6,4
+280,1123,Departamento,Departamento General Güemes,Departamento,General Güemes,22063,2,4,5,6,6,6,4,2,0,0,0,1,2,3,3,3,2,2,3,5,5,4,3,3,3,3,3,3,3,4,5,6,6,5,3,1
+282,1149,Departamento,Departamento Patiño,Departamento,Patiño,34035,5,6,6,6,6,5,3,1,0,0,0,1,2,3,3,2,1,1,3,6,7,7,6,5,6,6,6,5,3,3,4,6,7,6,3,1
+284,1156,Departamento,Departamento Tapenagá,Departamento,Tapenagá,22161,2,4,5,6,5,4,4,5,5,3,1,0,0,0,0,0,0,0,1,4,6,5,2,0,0,0,0,1,2,4,6,8,9,8,7,6
+285,1157,Departamento,Departamento Quitilipi,Departamento,Quitilipi,22133,2,4,5,6,5,4,4,5,5,3,1,1,2,3,3,3,2,1,0,1,1,1,0,0,0,0,0,0,1,3,5,7,8,8,7,6
+286,1158,Departamento,Departamento Presidencia de la Plaza,Departamento,Presidencia de la Plaza,22119,2,4,5,6,5,4,4,5,5,3,1,0,0,0,0,0,0,0,0,2,3,3,1,0,0,0,0,0,1,3,5,7,8,8,7,6
+287,1160,Departamento,Departamento Sargento Cabral,Departamento,Sargento Cabral,22154,2,4,5,6,5,4,2,1,0,0,0,1,2,3,3,3,2,1,1,4,6,6,3,1,0,0,0,0,1,3,5,7,8,8,7,6
+288,1161,Departamento,Departamento Independencia,Departamento,Independencia,22070,2,4,5,6,6,6,6,6,5,3,1,1,2,3,3,3,2,1,0,1,1,1,0,0,0,0,0,1,2,4,5,7,8,8,7,6
+289,1162,Departamento,Departamento Mayor Luis J. Fontana,Departamento,Mayor Luis J. Fontana,22098,2,3,4,5,5,4,2,3,3,3,1,0,0,0,0,1,1,1,0,3,4,4,1,2,3,3,3,3,3,4,6,8,9,8,7,6
+290,1163,Departamento,Departamento Fray Justo Santa María de Oro,Departamento,Fray Justo Santa María de Oro,22043,2,3,3,3,3,3,2,2,1,1,0,0,0,0,0,1,1,1,1,2,2,1,1,2,3,3,4,5,6,7,8,9,9,8,7,6
+297,1183,Departamento,Departamento Maipú,Departamento,Maipú,22091,2,4,5,6,5,4,4,2,0,0,0,1,2,3,3,3,2,1,1,2,2,1,0,0,0,0,0,1,2,4,5,7,8,8,7,6
+299,1192,Departamento,Departamento Almirante Brown,Departamento,Almirante Brown,22007,2,4,5,6,6,6,6,6,5,4,3,3,3,3,3,3,2,2,2,3,2,2,2,3,3,3,3,3,4,5,6,6,6,5,3,1
+308,1280,Departamento,Departamento Chacabuco,Departamento,Chacabuco,22028,2,4,5,6,6,6,6,6,5,3,1,0,0,0,0,1,1,1,0,1,1,1,1,2,3,3,3,3,4,5,7,8,9,8,7,6
+310,1292,Departamento,Departamento Formosa,Departamento,Formosa,34014,4,4,4,5,5,4,2,1,0,0,0,0,1,2,3,3,3,4,6,8,9,6,3,1,2,2,2,1,0,0,1,3,6,7,6,4
+311,1293,Departamento,Departamento Pilcomayo,Departamento,Pilcomayo,34049,4,4,4,5,5,4,2,1,0,0,0,0,1,2,3,3,3,4,6,8,8,5,2,0,1,2,2,2,2,1,1,3,6,7,6,4
+312,1295,Departamento,Departamento Libertador General San Martín,Departamento,Libertador General San Martín,22084,2,4,5,6,5,4,2,1,0,0,0,1,2,3,3,3,2,2,3,6,7,6,3,1,0,0,0,0,0,1,3,6,8,8,6,4
+313,1297,Departamento,Departamento Bermejo,Departamento,Bermejo,22014,4,4,4,5,5,4,2,1,0,0,1,2,3,3,3,3,2,2,4,7,8,6,4,2,1,0,0,0,0,1,3,6,8,8,6,4
+317,1315,Departamento,Departamento 1° de Mayo,Departamento,1° de Mayo,22126,2,4,4,5,5,4,4,5,5,3,1,1,2,2,3,3,2,2,4,7,8,6,3,2,1,0,0,0,0,1,3,6,8,8,6,6
+318,1316,Departamento,Departamento 9 de Julio,Departamento,9 de Julio,22105,2,4,5,6,6,6,6,6,5,3,1,0,0,0,0,1,1,1,0,1,1,1,1,2,3,3,3,3,4,5,7,8,9,8,7,6
+319,1317,Departamento,Departamento San Fernando,Departamento,San Fernando,22140,2,4,4,5,5,4,4,5,5,3,2,1,1,0,0,0,0,1,4,7,8,6,4,2,1,0,0,1,2,4,6,8,9,8,7,6
+320,1318,Departamento,Departamento San Lorenzo,Departamento,San Lorenzo,22147,2,4,5,6,6,6,6,6,5,3,1,0,0,0,0,1,1,1,0,1,1,1,0,0,0,0,0,1,2,4,6,8,9,8,7,6
+321,1319,Departamento,Departamento 2 de Abril,Departamento,2 de Abril,22039,2,3,3,3,3,3,2,3,3,3,1,0,0,0,0,1,1,1,0,1,1,1,1,2,3,3,3,4,5,6,7,8,9,8,6,4
+322,1323,Departamento,Departamento 25 de Mayo,Departamento,25 de Mayo,22168,2,4,5,6,5,4,4,5,5,3,1,0,0,0,0,1,1,1,0,1,1,1,0,0,0,0,0,0,1,3,5,7,8,8,7,6
+323,1324,Departamento,Departamento Libertad,Departamento,Libertad,22077,2,4,5,6,5,4,4,5,5,3,1,0,0,0,0,0,0,1,4,7,8,6,3,1,0,0,0,1,2,4,6,8,9,8,7,6
+324,1325,Departamento,Departamento Comandante Fernández,Departamento,Comandante Fernández,22021,2,4,5,6,5,4,4,5,5,3,1,1,2,3,3,3,2,1,0,1,1,1,0,0,0,0,0,1,2,4,5,7,8,8,7,6
+325,1326,Departamento,Departamento General Belgrano,Departamento,General Belgrano,22049,2,4,5,6,6,6,6,6,5,3,1,0,0,0,0,1,1,1,0,1,1,1,0,0,0,0,0,1,3,5,6,7,8,8,7,6
+326,1327,Departamento,Departamento General Donovan,Departamento,General Donovan,22056,2,4,5,6,5,4,4,5,5,3,1,0,0,1,2,3,2,1,4,7,8,5,2,0,0,0,0,0,1,3,5,7,8,8,7,6
+335,1360,Departamento,Departamento Villaguay,Departamento,Villaguay,30113,0,0,0,1,2,3,2,1,0,0,0,0,0,0,0,0,1,2,4,4,3,1,0,0,0,0,0,1,2,3,4,6,7,7,5,3
+336,1361,Departamento,Departamento Federal,Departamento,Federal,30035,0,0,0,1,2,3,2,1,0,0,0,0,0,0,0,1,2,3,4,5,4,2,0,0,0,0,0,0,1,2,4,6,7,7,5,4
+337,1362,Departamento,Departamento San Salvador,Departamento,San Salvador,30088,0,0,0,1,2,3,2,1,0,0,0,0,0,0,0,1,2,3,4,4,3,1,0,0,0,0,0,1,2,3,4,6,7,7,5,3
+338,1363,Departamento,Departamento Nogoyá,Departamento,Nogoyá,30077,0,0,1,2,3,4,3,3,1,1,0,0,0,0,0,0,1,2,4,4,3,1,0,0,0,1,2,5,7,9,9,9,8,7,5,4
+339,1364,Departamento,Departamento Tala,Departamento,Tala,30091,0,0,1,2,3,4,3,3,1,1,0,0,0,0,0,0,1,2,4,4,3,1,0,0,0,1,2,4,5,6,7,8,8,7,5,3
+340,1365,Departamento,Departamento La Paz,Departamento,La Paz,30070,0,0,0,1,2,3,2,1,0,0,0,0,0,0,0,0,1,2,4,4,3,1,0,1,2,3,3,3,4,5,6,7,7,7,5,4
+341,1366,Departamento,Departamento Feliciano,Departamento,Feliciano,30042,0,0,0,0,1,2,2,1,0,0,0,0,0,0,0,1,2,3,5,7,6,3,0,0,0,0,0,0,1,2,4,6,7,7,5,5
+342,1367,Departamento,Departamento Paraná,Departamento,Paraná,30084,0,0,1,2,3,4,3,2,0,0,0,2,4,6,6,5,4,4,5,6,5,4,2,2,2,3,3,4,5,6,7,8,8,7,5,4
+343,1368,Departamento,Departamento Diamante,Departamento,Diamante,30021,1,3,5,6,6,6,4,3,1,1,0,2,4,6,6,5,4,4,5,6,5,4,2,2,2,4,5,7,8,9,9,9,8,7,5,4
+349,1428,Departamento,Departamento Las Colonias,Departamento,Las Colonias,82070,0,0,1,2,4,4,3,1,0,0,0,0,0,0,0,0,0,1,2,3,2,1,0,1,3,5,6,7,8,9,9,9,8,7,5,4
+350,1429,Departamento,Departamento San Justo,Departamento,San Justo,82112,0,0,1,2,4,4,3,1,0,0,0,0,0,0,0,0,0,1,2,3,2,1,0,1,2,3,3,3,4,6,8,9,8,7,5,4
+351,1453,Departamento,Departamento Castellanos,Departamento,Castellanos,82021,0,0,1,2,4,4,3,1,0,0,0,0,0,0,1,2,2,2,2,3,2,1,1,2,4,5,6,7,8,9,9,9,8,7,5,4
+352,1454,Departamento,Departamento San Martín,Departamento,San Martín,82126,0,1,2,4,5,6,4,2,0,0,0,0,0,0,0,1,1,2,2,3,2,1,1,2,4,5,6,7,8,9,9,9,8,7,5,4
+355,1462,Departamento,Departamento General Obligado,Departamento,General Obligado,82049,0,1,3,5,5,4,2,2,0,0,0,0,0,0,0,0,0,1,3,6,6,5,2,2,2,3,3,3,4,6,8,9,9,8,7,6
+356,1466,Departamento,Departamento Vera,Departamento,Vera,82133,0,0,1,2,3,3,2,1,0,0,0,0,0,0,0,0,0,1,2,5,5,4,1,1,2,3,3,3,4,6,8,9,8,7,6,6
+357,1467,Departamento,Departamento 9 de Julio,Departamento,9 de Julio,82077,0,0,1,2,3,3,2,1,0,0,0,0,0,0,0,1,1,2,2,3,2,1,1,2,3,3,4,4,5,6,8,9,8,7,5,4
+358,1468,Departamento,Departamento San Cristóbal,Departamento,San Cristóbal,82091,0,0,1,2,4,4,3,1,0,0,0,0,0,0,0,1,1,2,2,3,2,1,1,2,3,3,3,4,5,7,9,9,8,7,5,4
+359,1469,Departamento,Departamento La Capital,Departamento,La Capital,82063,0,0,1,2,4,4,3,1,0,0,0,0,0,0,0,0,0,1,2,3,2,1,0,1,2,3,3,4,6,8,9,9,8,7,5,4
+360,1470,Departamento,Departamento San Javier,Departamento,San Javier,82098,0,0,1,2,4,4,3,1,0,0,0,0,0,0,0,0,0,1,2,5,4,3,1,1,2,3,3,3,4,6,8,9,8,7,5,5
+361,1476,Departamento,Departamento Garay,Departamento,Garay,82035,3,4,5,6,6,6,4,2,0,0,0,2,4,6,6,5,4,4,5,6,5,4,2,2,2,3,3,4,5,7,8,9,8,7,5,4
+362,1478,Departamento,Departamento San Jerónimo,Departamento,San Jerónimo,82105,0,1,2,3,3,4,3,3,1,1,0,0,0,0,0,1,1,2,2,3,2,1,0,1,3,5,6,7,8,9,9,9,8,7,5,4
+363,1479,Departamento,Departamento Capital,Departamento,Capital,54028,0,0,0,1,3,5,5,4,2,2,2,3,3,3,3,2,2,2,5,7,7,4,1,0,0,0,0,0,0,0,1,2,3,2,1,1
+364,1480,Departamento,Departamento San Ignacio,Departamento,San Ignacio,54098,0,0,0,1,3,5,5,4,2,2,2,3,3,3,3,2,2,2,5,7,6,4,1,0,0,0,0,0,0,0,0,0,0,0,0,0
+365,1481,Departamento,Departamento Candelaria,Departamento,Candelaria,54021,0,0,0,1,3,5,5,4,2,2,2,3,3,3,3,2,2,2,5,7,7,4,1,0,0,0,0,0,0,0,1,2,2,1,0,1
+366,1482,Departamento,Departamento Montecarlo,Departamento,Montecarlo,54084,0,0,0,1,3,4,3,2,1,2,2,3,3,3,3,2,2,2,5,7,6,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+367,1483,Departamento,Departamento Cainguás,Departamento,Cainguás,54014,0,0,0,1,3,5,5,4,2,2,2,3,3,3,3,2,2,2,5,7,6,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+368,1484,Departamento,Departamento Oberá,Departamento,Oberá,54091,0,0,0,1,3,5,5,4,2,2,2,3,3,3,3,2,2,2,5,7,7,4,1,0,0,0,0,0,0,0,1,2,2,1,0,0
+369,1485,Departamento,Departamento 25 de Mayo,Departamento,25 de Mayo,54119,0,0,0,1,3,5,5,4,2,2,2,3,3,3,3,2,2,2,5,7,6,3,0,0,0,0,0,0,0,0,1,2,2,1,0,0
+370,1486,Departamento,Departamento Leandro N. Alem,Departamento,Leandro N. Alem,54070,0,0,0,1,3,5,5,4,2,2,2,3,3,3,3,2,2,2,5,7,7,4,1,0,0,0,0,0,0,0,1,2,2,1,0,1
+371,1487,Departamento,Departamento San Javier,Departamento,San Javier,54105,0,0,0,1,3,5,5,4,2,2,2,3,3,3,3,2,2,2,5,7,6,3,0,0,0,0,0,0,0,0,1,2,2,1,0,1
+372,1488,Departamento,Departamento Concepción,Departamento,Concepción,54035,0,0,0,1,3,5,5,4,2,2,2,3,3,3,3,2,2,2,5,7,7,4,1,0,0,0,0,0,0,0,1,2,3,2,1,1
+373,1489,Departamento,Departamento Apóstoles,Departamento,Apóstoles,54007,0,0,0,1,3,5,5,4,2,2,2,3,3,3,3,2,2,2,5,7,7,4,1,0,0,0,0,0,0,0,1,2,3,2,1,1
+374,1490,Departamento,Departamento Guaraní,Departamento,Guaraní,54056,0,0,0,1,3,4,3,2,1,2,2,3,3,3,3,2,2,2,5,7,6,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+375,1491,Departamento,Departamento San Pedro,Departamento,San Pedro,54112,0,0,0,1,3,4,3,2,2,4,5,6,6,6,6,5,4,4,5,6,4,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+376,1492,Departamento,Departamento Iguazú,Departamento,Iguazú,54063,0,0,0,1,3,4,3,2,2,3,4,5,6,6,6,5,4,4,5,6,4,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+377,1493,Departamento,Departamento General Manuel Belgrano,Departamento,General Manuel Belgrano,54049,0,0,0,1,3,4,3,2,2,3,4,6,6,6,6,5,4,4,5,6,4,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+378,1494,Departamento,Departamento Eldorado,Departamento,Eldorado,54042,0,0,0,1,3,4,3,2,2,3,3,3,3,3,3,2,2,2,5,7,6,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+379,1495,Departamento,Departamento Libertador General San Martín,Departamento,Libertador General San Martín,54077,0,0,0,1,3,5,5,4,2,2,2,3,3,3,3,2,2,2,5,7,6,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+380,1496,Departamento,Departamento Federación,Departamento,Federación,30028,0,0,0,1,2,3,2,1,0,0,0,0,0,0,0,1,2,3,5,7,6,3,0,0,0,0,0,0,1,2,4,6,7,6,4,3
+381,1499,Departamento,Departamento Colón,Departamento,Colón,30008,0,0,0,1,2,3,2,2,0,0,0,0,0,0,0,0,1,2,4,4,3,1,0,0,0,0,0,1,2,3,4,6,7,7,5,3
+382,1501,Departamento,Departamento Concordia,Departamento,Concordia,30015,0,0,0,1,2,3,2,1,0,0,0,0,0,0,0,1,2,3,4,5,4,2,0,0,0,0,0,1,2,3,4,6,7,6,4,3
+383,1502,Departamento,Departamento San Luis del Palmar,Departamento,San Luis del Palmar,18140,4,4,4,5,5,4,3,3,2,1,1,2,3,3,3,3,2,2,4,7,8,6,4,2,1,0,0,0,0,1,3,6,7,6,4,3
+384,1503,Departamento,Departamento Mburucuyá,Departamento,Mburucuyá,18098,0,1,3,5,5,4,2,1,0,0,1,2,3,3,3,3,2,2,4,7,8,6,3,1,0,0,0,0,0,1,3,6,7,7,5,4
+385,1504,Departamento,Departamento Concepción,Departamento,Concepción,18028,0,0,1,2,3,3,2,1,0,0,1,2,3,3,3,3,2,2,4,7,8,5,2,0,0,0,0,1,2,4,5,7,7,7,5,4
+386,1505,Departamento,Departamento Mercedes,Departamento,Mercedes,18105,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,2,2,4,7,8,5,2,0,0,0,1,2,3,4,6,8,8,7,5,4
+387,1506,Departamento,Departamento San Roque,Departamento,San Roque,18161,0,0,2,4,5,4,2,1,0,0,0,0,0,0,0,1,1,2,4,7,8,5,2,0,0,0,1,2,3,4,6,8,8,7,6,6
+388,1507,Departamento,Departamento General Paz,Departamento,General Paz,18063,1,1,2,4,5,4,3,3,2,1,1,2,3,3,3,3,2,2,4,7,8,6,3,1,0,0,0,0,0,1,3,6,7,6,4,3
+389,1508,Departamento,Departamento Empedrado,Departamento,Empedrado,18042,2,2,4,5,5,4,3,3,2,1,1,2,3,3,3,3,2,2,4,7,8,6,4,2,1,0,0,1,2,4,5,7,7,7,5,4
+390,1509,Departamento,Departamento Saladas,Departamento,Saladas,18126,1,1,3,5,5,4,2,1,0,0,1,2,3,3,3,3,2,2,4,7,8,6,3,1,0,0,0,1,2,4,5,7,7,7,6,6
+391,1510,Departamento,Departamento Bella Vista,Departamento,Bella Vista,18007,3,4,5,6,5,4,2,1,0,0,0,0,0,0,0,1,1,2,4,7,8,5,2,0,0,0,1,2,4,6,8,9,8,7,6,6
+392,1511,Departamento,Departamento Lavalle,Departamento,Lavalle,18091,0,0,2,4,5,4,2,1,0,0,0,0,0,0,0,1,1,2,4,7,8,5,2,1,2,3,3,3,4,6,8,9,8,7,6,6
+393,1512,Departamento,Departamento Goya,Departamento,Goya,18070,0,0,1,2,3,3,2,1,0,0,0,0,0,0,0,1,1,2,4,7,6,4,2,1,2,3,3,3,4,6,8,9,8,7,6,6
+394,1513,Departamento,Departamento Esquina,Departamento,Esquina,18049,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,2,4,7,6,3,0,1,2,3,3,3,4,6,8,9,8,7,5,5
+395,1514,Departamento,Departamento Sauce,Departamento,Sauce,18175,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,2,4,7,7,4,1,0,0,0,0,0,1,3,6,8,8,7,6,6
+396,1515,Departamento,Departamento Curuzú Cuatiá,Departamento,Curuzú Cuatiá,18035,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,2,4,7,7,4,1,0,0,0,1,2,3,5,8,9,8,7,6,6
+397,1516,Departamento,Departamento Monte Caseros,Departamento,Monte Caseros,18112,0,0,0,1,2,3,2,1,0,0,0,0,0,0,0,1,2,3,5,7,7,4,1,0,0,0,0,0,1,3,5,7,7,7,6,6
+398,1517,Departamento,Departamento Paso de los Libres,Departamento,Paso de los Libres,18119,0,0,0,0,1,2,2,1,0,0,0,0,0,1,2,3,3,3,5,7,7,4,1,0,0,0,1,2,3,4,5,7,7,6,4,3
+399,1518,Departamento,Departamento San Martín,Departamento,San Martín,18147,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,3,3,3,5,7,7,4,1,0,0,0,0,0,0,1,3,6,7,6,4,3
+400,1519,Departamento,Departamento General Alvear,Departamento,General Alvear,18056,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,3,3,3,5,7,7,4,1,0,0,0,0,0,0,1,3,6,7,6,4,3
+401,1520,Departamento,Departamento Santo Tomé,Departamento,Santo Tomé,18168,0,0,0,0,0,0,0,1,1,1,1,1,1,2,3,2,2,2,5,7,8,5,2,0,0,0,0,0,0,1,3,6,7,6,3,2
+402,1521,Departamento,Departamento San Miguel,Departamento,San Miguel,18154,0,0,1,3,4,4,2,1,0,0,1,2,3,3,3,3,2,2,4,7,8,5,2,1,0,0,0,0,0,1,3,6,7,6,4,3
+403,1522,Departamento,Departamento Ituzaingó,Departamento,Ituzaingó,18084,0,0,1,1,3,4,3,2,1,1,1,2,3,3,3,3,2,2,5,7,8,5,2,0,0,0,0,0,0,1,3,6,7,6,4,3
+404,1523,Departamento,Departamento Berón de Astrada,Departamento,Berón de Astrada,18014,3,2,2,3,4,4,3,3,2,1,1,2,3,3,3,3,2,2,4,7,8,6,3,1,0,0,0,0,0,1,3,6,7,6,4,3
+405,1524,Departamento,Departamento Itatí,Departamento,Itatí,18077,4,3,3,4,5,4,3,3,2,1,1,2,3,3,3,3,2,2,4,6,5,4,3,2,1,0,0,0,0,1,3,6,7,6,4,3
+406,1525,Departamento,Departamento San Cosme,Departamento,San Cosme,18133,4,4,4,5,5,4,3,3,2,1,1,2,3,3,3,3,2,2,4,7,8,6,4,2,1,0,0,1,2,3,4,6,7,6,4,3
+407,1526,Departamento,Departamento Capital,Departamento,Capital,18021,4,4,4,5,6,6,5,4,2,1,1,2,3,3,3,3,2,2,4,7,8,6,4,2,1,0,0,1,2,4,6,8,8,6,4,3
+408,1527,Departamento,Departamento Tulumba,Departamento,Tulumba,14175,0,0,1,2,3,3,2,1,0,0,0,0,1,2,3,3,2,2,2,3,2,2,2,3,5,6,6,6,7,8,8,7,6,6,6,6
+409,1528,Departamento,Departamento Cruz del Eje,Departamento,Cruz del Eje,14028,0,0,1,2,3,3,2,1,0,0,0,0,1,2,3,3,2,1,1,1,0,1,2,3,3,3,3,3,3,3,3,3,3,3,3,3
+410,1529,Departamento,Departamento Punilla,Departamento,Punilla,14091,3,5,6,6,6,5,3,1,0,0,0,0,0,0,0,0,0,1,1,1,0,1,2,4,5,6,6,6,6,6,5,4,3,3,3,3
+411,1530,Departamento,Departamento Santa María,Departamento,Santa María,14147,4,5,6,6,6,5,3,1,0,0,0,0,0,0,0,0,0,1,1,2,1,2,3,5,6,6,6,7,8,9,7,5,3,3,3,3
+412,1531,Departamento,Departamento Minas,Departamento,Minas,14070,2,4,6,6,6,5,3,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,3,3,3,3,3,3,3,3,3,3,3
+413,1532,Departamento,Departamento San Alberto,Departamento,San Alberto,14126,3,5,6,6,6,5,3,1,0,0,0,0,0,0,0,0,0,1,1,2,2,3,3,5,6,6,6,6,6,6,5,4,3,3,3,3
+414,1533,Departamento,Departamento Río Segundo,Departamento,Río Segundo,14119,3,4,6,6,6,5,3,1,0,0,0,0,0,0,0,0,0,1,1,2,1,2,2,4,5,6,6,7,8,9,8,7,6,6,6,6
+415,1534,Departamento,Departamento San Justo,Departamento,San Justo,14140,0,1,2,3,4,4,3,1,0,0,0,0,0,0,0,1,1,2,2,3,2,1,1,2,4,5,6,7,8,9,9,9,8,7,5,4
+416,1540,Departamento,Departamento Río Seco,Departamento,Río Seco,14112,0,0,1,2,3,3,2,1,0,0,0,0,1,2,3,3,2,2,2,3,2,1,1,3,5,6,6,6,7,8,8,7,6,6,5,4
+417,1541,Departamento,Departamento Sobremonte,Departamento,Sobremonte,14154,0,0,1,1,1,0,0,0,0,0,0,0,1,2,3,3,2,2,2,3,2,2,2,4,5,6,6,6,7,8,7,6,5,6,5,4
+418,1542,Departamento,Departamento Capital,Departamento,Capital,14014,3,4,6,6,6,5,3,1,0,0,0,0,0,0,0,0,0,1,1,2,1,2,2,4,5,6,6,7,8,9,7,5,3,3,3,3
+419,1544,Departamento,Departamento Colón,Departamento,Colón,14021,2,4,6,6,6,5,3,1,0,0,0,0,0,0,0,0,0,1,1,2,1,2,2,4,5,6,6,6,7,8,7,5,3,3,4,5
+420,1545,Departamento,Departamento Ischilín,Departamento,Ischilín,14049,0,0,1,2,3,3,2,1,0,0,0,0,1,2,3,3,2,2,1,1,0,1,2,3,3,3,3,4,5,6,5,4,3,3,3,3
+421,1546,Departamento,Departamento Totoral,Departamento,Totoral,14168,0,1,2,3,3,3,2,1,0,0,0,0,0,0,1,2,2,2,2,3,2,2,2,4,5,6,6,6,7,8,8,7,6,6,6,6
+422,1548,Departamento,Departamento San Javier,Departamento,San Javier,14133,3,5,6,6,6,5,3,1,0,0,0,0,0,0,0,0,0,1,1,2,2,3,4,5,6,6,6,7,7,7,5,4,3,3,2,1
+423,1549,Departamento,Departamento Río Primero,Departamento,Río Primero,14105,0,1,2,3,3,3,2,1,0,0,0,0,0,0,0,0,0,1,2,3,2,1,1,3,5,6,6,7,8,9,8,7,6,6,6,6
+424,1551,Departamento,Departamento Calamuchita,Departamento,Calamuchita,14007,4,5,6,6,6,5,3,1,0,0,0,0,0,0,0,0,0,1,1,2,2,3,4,5,6,6,6,7,7,7,5,4,3,3,3,3
+425,1552,Departamento,Departamento Pocho,Departamento,Pocho,14077,3,5,6,6,6,5,3,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,3,3,3,4,5,5,4,3,3,3,3,3
+454,1150,Departamento,Departamento Bermejo,Departamento,Bermejo,34007,2,4,5,6,6,5,3,1,0,0,0,0,1,2,3,2,1,1,3,5,6,6,6,6,6,6,6,5,4,4,5,6,4,2,0,0
+456,1152,Departamento,Departamento Matacos,Departamento,Matacos,34028,2,4,5,6,6,5,3,1,0,0,0,0,0,0,0,0,0,1,3,5,6,6,6,6,6,6,5,4,3,4,5,5,3,1,0,0
+479,1312,Departamento,Departamento Ramón Lista,Departamento,Ramón Lista,34063,2,4,5,6,6,5,3,1,0,0,0,0,0,0,0,0,0,1,3,5,6,6,6,6,6,6,5,4,3,3,4,4,3,1,0,0
+507,1432,Departamento,Departamento Chical Co,Departamento,Chical Co,42063,3,3,3,3,3,3,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,3,2,1,0,0,0,0,0,1
+508,1445,Departamento,Departamento Chalileo,Departamento,Chalileo,42049,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,3,3,3,3,3,2,1,0,0
+509,1446,Departamento,Departamento Puelén,Departamento,Puelén,42112,3,3,3,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
