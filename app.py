@@ -18,6 +18,26 @@ st.title("🌵 Dashboard de Sequía IIPAC")
 st.caption("Intensidad de sequía y resoluciones de emergencia agropecuaria")
 
 # ─────────────────────────────────────────────────────────────────────
+# FUNCIONES AUXILIARES
+# ─────────────────────────────────────────────────────────────────────
+def normalizar_nombre(nombre):
+    nombre = str(nombre).strip()
+    for a, b in [('á','a'),('é','e'),('í','i'),('ó','o'),('ú','u'),('ñ','n'),
+                 ('Á','A'),('É','E'),('Í','I'),('Ó','O'),('Ú','U'),('Ñ','N')]:
+        nombre = nombre.replace(a, b)
+    return re.sub(r'[^a-z0-9]', '', nombre.lower())
+
+def buscar_columna(df, patrones):
+    """Busca una columna por coincidencia flexible (sin tildes, sin mayúsculas)."""
+    cols_norm = {normalizar_nombre(c): c for c in df.columns}
+    for p in patrones:
+        pn = normalizar_nombre(p)
+        for cn, cr in cols_norm.items():
+            if pn in cn or cn in pn:
+                return cr
+    return None
+
+# ─────────────────────────────────────────────────────────────────────
 # CARGA DE DATOS
 # ─────────────────────────────────────────────────────────────────────
 @st.cache_data
@@ -26,42 +46,64 @@ def load_data():
     URL_EME = "https://raw.githubusercontent.com/emiliano2026/sequia/main/BBDD_todo.csv"
 
     # ── Base de sequía (delimitador coma) ───────────────────────────
-    df_seq = pd.read_csv(URL_SEQ, sep=',', skipinitialspace=True, dtype=str)
+    df_seq = pd.read_csv(URL_SEQ, sep=',', skipinitialspace=True,
+                         dtype=str, encoding='utf-8-sig')
     df_seq.columns = df_seq.columns.str.strip()
 
-    # Identificar columnas de meses: terminan en "_median"
+    # Columnas de meses: terminan en "_median"
     cols_seq = [c for c in df_seq.columns if c.endswith('_median')]
-    # Mapear a formato MES_AAAA
     mapa_seq = {}
     for c in cols_seq:
         m = re.match(r'([A-Z]{3})(\d{4})_median', c)
         if m:
             mapa_seq[c] = f"{m.group(1)}_{m.group(2)}"
     df_seq = df_seq.rename(columns=mapa_seq)
-    periodos_seq = sorted(mapa_seq.values(), key=lambda x: (int(x.split('_')[1]), x.split('_')[0]))
+    periodos_seq = sorted(mapa_seq.values(),
+                          key=lambda x: (int(x.split('_')[1]), x.split('_')[0]))
 
-    # Convertir valores de sequía a numérico
     for p in periodos_seq:
         df_seq[p] = pd.to_numeric(df_seq[p], errors='coerce')
 
-    # Normalizar nombres de provincia y departamento
-    df_seq['PROVINCIA'] = df_seq['PROVINCIA'].str.strip().str.upper()
-    df_seq['DEPARTAMENTO'] = df_seq['DEPARTAMENTO'].str.strip().str.upper()
+    # Detección flexible de PROVINCIA y DEPARTAMENTO
+    col_prov_seq = buscar_columna(df_seq, ['provincia'])
+    col_dept_seq = buscar_columna(df_seq, ['departamento', 'nam', 'partido', 'municipio'])
+
+    if not col_prov_seq or not col_dept_seq:
+        st.error("❌ No se detectaron columnas de PROVINCIA/DEPARTAMENTO en la base de sequía.")
+        st.write("**Columnas disponibles:**", list(df_seq.columns))
+        st.stop()
+
+    df_seq['PROVINCIA']    = df_seq[col_prov_seq].astype(str).str.strip().str.upper()
+    df_seq['DEPARTAMENTO'] = df_seq[col_dept_seq].astype(str).str.strip().str.upper()
 
     # ── Base de emergencia (delimitador |) ──────────────────────────
-    df_eme = pd.read_csv(URL_EME, sep='|', skipinitialspace=True, dtype=str)
+    df_eme = pd.read_csv(URL_EME, sep='|', skipinitialspace=True,
+                         dtype=str, encoding='utf-8-sig')
     df_eme.columns = df_eme.columns.str.strip()
 
     # Columnas de meses: formato MES_AAAA
     cols_eme = [c for c in df_eme.columns if re.match(r'^[A-Z]{3}_\d{4}$', c)]
-    periodos_eme = sorted(cols_eme, key=lambda x: (int(x.split('_')[1]), x.split('_')[0]))
+    periodos_eme = sorted(cols_eme,
+                          key=lambda x: (int(x.split('_')[1]), x.split('_')[0]))
 
-    # Normalizar nombres
-    df_eme['PROVINCIA'] = df_eme['PROVINCIA'].str.strip().str.upper()
-    df_eme['DEPARTAMENTO'] = df_eme['DEPARTAMENTO'].str.strip().str.upper()
-    df_eme['ACTIVIDAD'] = df_eme['ACTIVIDAD'].str.strip()
+    # Detección flexible
+    col_prov_eme = buscar_columna(df_eme, ['provincia'])
+    col_dept_eme = buscar_columna(df_eme, ['departamento', 'nam', 'partido', 'municipio'])
+    col_act_eme  = buscar_columna(df_eme, ['actividad'])
 
-    # Unión de períodos (para eje X extendido)
+    if not col_prov_eme or not col_dept_eme or not col_act_eme:
+        st.error("❌ No se detectaron todas las columnas necesarias en BBDD_todo.")
+        st.write("**Columnas detectadas en BBDD_todo:**", list(df_eme.columns))
+        st.write("¿Se encontró PROVINCIA?", col_prov_eme)
+        st.write("¿Se encontró DEPARTAMENTO/nam?", col_dept_eme)
+        st.write("¿Se encontró ACTIVIDAD?", col_act_eme)
+        st.stop()
+
+    df_eme['PROVINCIA']    = df_eme[col_prov_eme].astype(str).str.strip().str.upper()
+    df_eme['DEPARTAMENTO'] = df_eme[col_dept_eme].astype(str).str.strip().str.upper()
+    df_eme['ACTIVIDAD']    = df_eme[col_act_eme].astype(str).str.strip()
+
+    # ── Unión de períodos ───────────────────────────────────────────
     periodos_todos = sorted(set(periodos_seq) | set(periodos_eme),
                             key=lambda x: (int(x.split('_')[1]), x.split('_')[0]))
 
@@ -74,7 +116,7 @@ df_seq, df_eme, periodos_seq, periodos_eme, periodos_todos = load_data()
 # ─────────────────────────────────────────────────────────────────────
 st.sidebar.header("🔍 Filtros")
 
-# Provincias (de la base de sequía, que ahora tiene PROVINCIA)
+# Provincias (de la base de sequía)
 provincias = sorted(df_seq['PROVINCIA'].dropna().unique())
 prov_sel = st.sidebar.selectbox("📍 Provincia", provincias)
 
@@ -214,6 +256,8 @@ else:
 # EXPANDER DE DEPURACIÓN
 # ─────────────────────────────────────────────────────────────────────
 with st.expander("🔧 Ver datos crudos (depuración)"):
+    st.write("**Columnas BBDD_sequia:**", list(df_seq.columns))
+    st.write("**Columnas BBDD_todo:**", list(df_eme.columns))
     st.write("**Períodos de sequía:**", periodos_seq)
     st.write("**Períodos de emergencia:**", periodos_eme)
     st.write("**Períodos totales (eje X):**", periodos_todos)
