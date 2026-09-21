@@ -193,20 +193,16 @@ df_med, df_max, df_eme, periodos_med, periodos_eme, periodos_todos = load_data()
 # ─────────────────────────────────────────────────────────────────────
 @st.cache_data
 def cargar_geojson():
-    """Carga el GeoJSON de departamentos desde el repositorio."""
     url = "https://raw.githubusercontent.com/emiliano2026/sequia/main/Departamentos_area_estudio_v3.geojson"
     with urllib.request.urlopen(url) as resp:
         geojson_data = json.loads(resp.read().decode('utf-8'))
 
-    # El GeoJSON tiene la propiedad 'DEPARTAMENTO' y 'PROVINCIA'
     col_nombre = 'DEPARTAMENTO'
 
-    # Normalizar el nombre de cada departamento
     for feat in geojson_data['features']:
         nombre = feat['properties'].get(col_nombre, '')
         feat['properties']['_dept_norm'] = normalizar_nombre(nombre)
 
-    # Calcular centroide aproximado
     lats, lons = [], []
     for feat in geojson_data['features']:
         coords = feat['geometry']['coordinates']
@@ -231,9 +227,18 @@ except Exception as e:
     GEOJSON_OK = False
 
 # ─────────────────────────────────────────────────────────────────────
+# SESSION STATE (se inicializa ANTES del mapa para que el clic lo actualice)
+# ─────────────────────────────────────────────────────────────────────
+if "prov_sel" not in st.session_state:
+    st.session_state["prov_sel"] = None
+if "depto_sel" not in st.session_state:
+    st.session_state["depto_sel"] = None
+
+# ─────────────────────────────────────────────────────────────────────
 # MAPA COROPLÉTICO INTERACTIVO
 # ─────────────────────────────────────────────────────────────────────
 st.subheader("🗺️ Distribución espacial de la sequía")
+st.caption("Hacé clic en un departamento del mapa para graficar sus curvas.")
 
 if GEOJSON_OK and geojson_deptos is not None:
 
@@ -278,16 +283,15 @@ if GEOJSON_OK and geojson_deptos is not None:
         st.markdown(leyenda_items, unsafe_allow_html=True)
 
     with col_mapa:
-        # Elegir base según estadístico
         df_sel = df_med if estadistico_mapa == "Mediana" else df_max
-
-        # Merge: obtener el valor del mes seleccionado por departamento
         df_val = df_sel[['_dept_norm', periodo_mapa]].copy()
         df_val = df_val.rename(columns={periodo_mapa: 'valor'})
         df_val = df_val.dropna(subset=['valor']).drop_duplicates('_dept_norm')
         valores_por_depto = dict(zip(df_val['_dept_norm'], df_val['valor']))
 
-        # Crear mapa con OpenStreetMap (sin marca de agua)
+        # Determinar depto actualmente seleccionado (para resaltarlo)
+        depto_actual_norm = normalizar_nombre(st.session_state.get("depto_sel") or "")
+
         m = folium.Map(
             location=list(centro_mapa),
             zoom_start=5,
@@ -297,11 +301,12 @@ if GEOJSON_OK and geojson_deptos is not None:
         def estilo(feature):
             norm = feature['properties'].get('_dept_norm', '')
             valor = valores_por_depto.get(norm)
+            es_sel = (norm == depto_actual_norm) and norm != ""
             return {
                 'fillColor': color_sequia(valor),
-                'color': 'black',
-                'weight': 0.6,
-                'fillOpacity': 0.85,
+                'color': '#0000FF' if es_sel else 'black',
+                'weight': 3 if es_sel else 0.6,
+                'fillOpacity': 0.9 if es_sel else 0.85,
             }
 
         folium.GeoJson(
@@ -315,7 +320,32 @@ if GEOJSON_OK and geojson_deptos is not None:
             ),
         ).add_to(m)
 
-        st_folium(m, width=None, height=520, key="mapa_sequia")
+        # ← AQUÍ ESTÁ LA CLAVE: returned_objects captura el clic
+        map_data = st_folium(
+            m,
+            width=None,
+            height=520,
+            key="mapa_sequia",
+            returned_objects=["last_active_drawing"],
+        )
+
+    # ── Procesar el clic del mapa ──────────────────────────────────
+    if map_data and map_data.get("last_active_drawing"):
+        props = map_data["last_active_drawing"]["properties"]
+        clicked_norm = props.get("_dept_norm", "")
+
+        if clicked_norm:
+            # Buscar el nombre real en df_med
+            match_row = df_med[df_med['_dept_norm'] == clicked_norm]
+            if not match_row.empty:
+                nuevo_depto = match_row['DEPARTAMENTO'].iloc[0]
+                nueva_prov  = match_row['PROVINCIA'].iloc[0]
+
+                # Solo actualizar si cambió (evita reruns infinitos)
+                if st.session_state.get("depto_sel") != nuevo_depto:
+                    st.session_state["depto_sel"] = nuevo_depto
+                    st.session_state["prov_sel"] = nueva_prov
+                    st.rerun()
 
     st.caption(
         f"Valor {estadistico_mapa.lower()} de intensidad de sequía acumulada — {periodo_mapa}. "
@@ -324,14 +354,6 @@ if GEOJSON_OK and geojson_deptos is not None:
 
 else:
     st.info("ℹ️ Subí el archivo 'Departamentos_area_estudio_v3.geojson' al repositorio para ver el mapa.")
-
-# ─────────────────────────────────────────────────────────────────────
-# SESSION STATE
-# ─────────────────────────────────────────────────────────────────────
-if "depto_sel" not in st.session_state:
-    st.session_state["depto_sel"] = None
-if "prov_sel" not in st.session_state:
-    st.session_state["prov_sel"] = None
 
 # ─────────────────────────────────────────────────────────────────────
 # FILTROS
