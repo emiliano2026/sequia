@@ -3,6 +3,8 @@ pandas
 plotly
 numpy
 geopandas
+fiona
+shapely
+pyproj
 folium
 streamlit-folium
-scikit-learn
