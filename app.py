@@ -5,6 +5,8 @@ from plotly.subplots import make_subplots
 import numpy as np
 import re
 import unicodedata
+import folium
+from streamlit_folium import st_folium
 
 # ─────────────────────────────────────────────────────────────────────
 # CONFIGURACIÓN
@@ -20,7 +22,7 @@ st.title("Análisis de la Sequía 2020-2023 (Evento Niña)")
 st.markdown(
     """
     <div style="font-size: 17px; line-height: 1.6; color: #444; margin-bottom: 1.5rem;">
-        <b>Análisis de la intensidad y duración de la sequía en relación a las resoluciones de emergencia declaradas para la región Noreste y Centro según regionalización del SINAGIR.</b><br> 
+        <b>Análisis de la intensidad y duración de la sequía en relación a las resoluciones de emergencia declaradas.</b><br> 
         El valor de sequía corresponde al valor acumulado trimestral, sumatoria de los valores de intensidad de sequía: leve = 1, moderada = 2 y severa = 3.<br>
         Se representan dos curvas: el valor <b>mediana</b> y el valor <b>máximo</b> departamental.
     </div>
@@ -85,6 +87,20 @@ def color_para_actividad(act):
     return '#cccccc'
 
 # ─────────────────────────────────────────────────────────────────────
+# COLORES POR CLUSTER (para el mapa)
+# ─────────────────────────────────────────────────────────────────────
+COLORES_CLUSTER = {
+    0: '#e41a1c',  # rojo
+    1: '#377eb8',  # azul
+    2: '#4daf4a',  # verde
+    3: '#984ea3',  # violeta
+    4: '#ff7f00',  # naranja
+    5: '#a65628',  # marrón
+    6: '#f781bf',  # rosa
+    7: '#999999',  # gris
+}
+
+# ─────────────────────────────────────────────────────────────────────
 # CARGA DE DATOS
 # ─────────────────────────────────────────────────────────────────────
 @st.cache_data
@@ -93,12 +109,10 @@ def load_data():
     URL_MAX = "https://raw.githubusercontent.com/emiliano2026/sequia/main/BBDD_sequia_maximo.csv"
     URL_EME = "https://raw.githubusercontent.com/emiliano2026/sequia/main/BBDD_todo_V2.csv"
 
-    # Función auxiliar para leer y estandarizar una base de sequía
     def leer_base_sequia(url, sufijo):
         df = pd.read_csv(url, sep=',', skipinitialspace=True,
                          dtype=str, encoding='utf-8-sig')
         df.columns = df.columns.str.strip()
-        # Mapear columnas MES_AAAA_sufijo -> MES_AAAA
         cols = [c for c in df.columns if c.endswith(sufijo)]
         mapa = {}
         for c in cols:
@@ -153,7 +167,7 @@ def load_data():
     df_eme['_prov_norm']   = df_eme['PROVINCIA'].apply(normalizar_nombre)
     df_eme['_dept_norm']   = df_eme['DEPARTAMENTO'].apply(normalizar_nombre)
 
-    # Unión de períodos (mediana + emergencia; máximo tiene los mismos)
+    # Unión de períodos (mediana + emergencia)
     periodos_todos = list(periodos_med)
     for p in periodos_eme:
         if p not in periodos_todos:
@@ -164,17 +178,194 @@ def load_data():
 df_med, df_max, df_eme, periodos_med, periodos_eme, periodos_todos = load_data()
 
 # ─────────────────────────────────────────────────────────────────────
+# CLUSTERING FIJO (K-MEANS sobre la mediana)
+# ─────────────────────────────────────────────────────────────────────
+@st.cache_data
+def calcular_clusters(df_med, periodos_med, k=5):
+    """Calcula clustering K-means sobre las series de mediana, con k fijo."""
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.cluster import KMeans
+
+    # Matriz de series (solo filas sin NaN)
+    df_valid = df_med.dropna(subset=periodos_med).copy()
+    if df_valid.empty:
+        return df_med.assign(cluster=-1)
+
+    X = df_valid[periodos_med].values
+    scaler = StandardScaler()
+    X_z = scaler.fit_transform(X)
+
+    km = KMeans(n_clusters=k, n_init=10, random_state=42)
+    df_valid['cluster'] = km.fit_predict(X_z)
+
+    # Devolver todo el df_med con la columna cluster
+    df_out = df_med.merge(
+        df_valid[['PROVINCIA', 'DEPARTAMENTO', 'cluster']],
+        on=['PROVINCIA', 'DEPARTAMENTO'],
+        how='left'
+    )
+    df_out['cluster'] = df_out['cluster'].fillna(-1).astype(int)
+    return df_out
+
+df_med = calcular_clusters(df_med, periodos_med, k=5)
+
+# ─────────────────────────────────────────────────────────────────────
+# CARGA DEL GEOPACKAGE
+# ─────────────────────────────────────────────────────────────────────
+@st.cache_data
+def cargar_geopackage():
+    """Carga el GeoPackage de departamentos del área de estudio."""
+    import geopandas as gpd
+
+    # Opción A: archivo local en el repo
+    try:
+        gdf = gpd.read_file("Departamentos_area_estudio.gpkg")
+    except Exception:
+        # Opción B: descargar desde GitHub raw
+        url = "https://raw.githubusercontent.com/emiliano2026/sequia/main/Departamentos_area_estudio.gpkg"
+        gdf = gpd.read_file(url)
+
+    # Asegurar CRS WGS84 (lat/lon)
+    if gdf.crs is not None and gdf.crs.to_string() != 'EPSG:4326':
+        gdf = gdf.to_crs(epsg=4326)
+
+    return gdf
+
+try:
+    gdf_deptos = cargar_geopackage()
+    GEOPACKAGE_OK = True
+except Exception as e:
+    st.sidebar.warning(f"⚠️ No se pudo cargar el GeoPackage: {e}")
+    gdf_deptos = None
+    GEOPACKAGE_OK = False
+
+# ─────────────────────────────────────────────────────────────────────
+# SESSION STATE
+# ─────────────────────────────────────────────────────────────────────
+if "depto_sel" not in st.session_state:
+    st.session_state["depto_sel"] = None
+if "prov_sel" not in st.session_state:
+    st.session_state["prov_sel"] = None
+
+# ─────────────────────────────────────────────────────────────────────
+# MAPA INTERACTIVO
+# ─────────────────────────────────────────────────────────────────────
+st.subheader("🗺️ Mapa interactivo — clic en un departamento para filtrar")
+
+if GEOPACKAGE_OK and gdf_deptos is not None:
+    # Detectar columna de nombre en el GeoPackage
+    col_nombre_geo = buscar_columna(gdf_deptos, ['departamento', 'nam', 'nombre', 'partido', 'dpto'])
+    col_prov_geo   = buscar_columna(gdf_deptos, ['provincia'])
+
+    if col_nombre_geo is None:
+        st.error(f"❌ No se detectó columna de nombre en el GeoPackage. Columnas: {list(gdf_deptos.columns)}")
+    else:
+        # Normalizar nombres para el match
+        gdf_deptos['_dept_norm'] = gdf_deptos[col_nombre_geo].apply(normalizar_nombre)
+
+        # Unir con clusters
+        df_clusters = df_med[['PROVINCIA', 'DEPARTAMENTO', '_dept_norm', 'cluster']].drop_duplicates('_dept_norm')
+        gdf_deptos = gdf_deptos.merge(
+            df_clusters[['_dept_norm', 'cluster']],
+            on='_dept_norm',
+            how='left'
+        )
+        gdf_deptos['cluster'] = gdf_deptos['cluster'].fillna(-1).astype(int)
+
+        # Calcular centro del mapa
+        try:
+            centro = gdf_deptos.geometry.unary_union.centroid
+            centro_lat, centro_lon = centro.y, centro.x
+        except Exception:
+            centro_lat, centro_lon = -36.0, -60.0
+
+        # Crear mapa
+        m = folium.Map(
+            location=[centro_lat, centro_lon],
+            zoom_start=5,
+            tiles="OpenStreetMap"
+        )
+
+        # Función de estilo
+        def estilo_depto(feature):
+            cluster = feature['properties'].get('cluster', -1)
+            color = COLORES_CLUSTER.get(cluster, '#cccccc')
+            return {
+                'fillColor': color,
+                'color': 'black',
+                'weight': 0.8,
+                'fillOpacity': 0.65,
+            }
+
+        # Agregar capa GeoJSON
+        folium.GeoJson(
+            gdf_deptos.__geo_interface__,
+            name='Departamentos',
+            style_function=estilo_depto,
+            tooltip=folium.GeoJsonTooltip(
+                fields=[col_nombre_geo],
+                aliases=['Departamento:'],
+                localize=True,
+            ),
+        ).add_to(m)
+
+        # Renderizar y capturar clic
+        map_data = st_folium(
+            m,
+            width="100%",
+            height=500,
+            returned_objects=["last_active_drawing"],
+            key="mapa_deptos",
+        )
+
+        # Procesar clic
+        if map_data and map_data.get("last_active_drawing"):
+            props = map_data["last_active_drawing"]["properties"]
+            clicked_name = props.get(col_nombre_geo, "")
+            clicked_norm = normalizar_nombre(clicked_name)
+
+            # Buscar el nombre real en df_med
+            match_row = df_med[df_med['_dept_norm'] == clicked_norm]
+            if not match_row.empty:
+                nuevo_depto = match_row['DEPARTAMENTO'].iloc[0]
+                nueva_prov  = match_row['PROVINCIA'].iloc[0]
+                if st.session_state["depto_sel"] != nuevo_depto:
+                    st.session_state["depto_sel"] = nuevo_depto
+                    st.session_state["prov_sel"] = nueva_prov
+                    st.rerun()
+else:
+    st.info("ℹ️ Subí el archivo 'Departamentos_area_estudio.gpkg' al repositorio para ver el mapa.")
+
+# ─────────────────────────────────────────────────────────────────────
 # FILTROS
 # ─────────────────────────────────────────────────────────────────────
 st.sidebar.header("Filtrado de Datos")
 
 provincias = sorted(df_med['PROVINCIA'].dropna().unique())
-prov_sel = st.sidebar.selectbox("Provincia", provincias)
+
+# Sincronizar prov_sel con session_state
+if st.session_state["prov_sel"] not in provincias:
+    st.session_state["prov_sel"] = provincias[0] if provincias else None
+
+prov_sel = st.sidebar.selectbox(
+    "Provincia",
+    provincias,
+    key="prov_sel"
+)
 prov_norm = normalizar_nombre(prov_sel)
 
 df_med_prov = df_med[df_med['_prov_norm'] == prov_norm]
 deptos = sorted(df_med_prov['DEPARTAMENTO'].dropna().unique())
-depto_sel = st.sidebar.selectbox("Departamento", deptos)
+
+# Sincronizar depto_sel con session_state
+if st.session_state["depto_sel"] not in deptos:
+    st.session_state["depto_sel"] = deptos[0] if deptos else None
+
+depto_sel = st.sidebar.selectbox(
+    "Departamento",
+    deptos,
+    key="depto_sel"
+)
 depto_norm = normalizar_nombre(depto_sel)
 
 # Cruce robusto con emergencia
@@ -209,7 +400,6 @@ if fila_med.empty:
     st.warning(f"⚠️ No hay datos de sequía (mediana) para {depto_sel} ({prov_sel}).")
     st.stop()
 
-# Alinear valores de mediana con periodos_todos
 valores_med = []
 for p in periodos_todos:
     if p in periodos_med:
@@ -218,7 +408,6 @@ for p in periodos_todos:
     else:
         valores_med.append(np.nan)
 
-# Buscar la fila de máximo (mismo departamento)
 df_max_prov = df_max[df_max['_prov_norm'] == prov_norm]
 fila_max = df_max_prov[df_max_prov['DEPARTAMENTO'] == depto_sel]
 valores_max = []
@@ -226,7 +415,7 @@ if fila_max.empty:
     valores_max = [np.nan] * len(periodos_todos)
 else:
     for p in periodos_todos:
-        if p in periodos_med:  # los períodos de máximo son los mismos
+        if p in periodos_med:
             v = fila_max[p].iloc[0]
             valores_max.append(v if pd.notna(v) else np.nan)
         else:
@@ -258,9 +447,7 @@ st.subheader(f"Evolución de la sequía — {depto_sel} ({prov_sel})")
 n_acts = len(act_sel)
 
 if n_acts == 0:
-    # ── Solo gráfico de sequía (mediana y máximo) ───────────────────
     fig = go.Figure()
-    # Curva MEDIANA
     fig.add_trace(go.Scatter(
         x=periodos_todos,
         y=valores_med,
@@ -270,7 +457,6 @@ if n_acts == 0:
         marker=dict(size=8, color='black'),
         connectgaps=False,
     ))
-    # Curva MÁXIMO
     fig.add_trace(go.Scatter(
         x=periodos_todos,
         y=valores_max,
@@ -304,7 +490,6 @@ if n_acts == 0:
         legend=dict(orientation='h', y=-0.25, x=0.5, xanchor='center'),
     )
 else:
-    # ── Con subplots: sequía arriba, emergencias abajo ───────────────
     fig = make_subplots(
         rows=2, cols=1,
         shared_xaxes=True,
@@ -313,7 +498,6 @@ else:
         subplot_titles=("", "Resoluciones Nacionales de Emergencia por tipo de Actividad"),
     )
 
-    # Subplot 1: sequía - MEDIANA
     fig.add_trace(go.Scatter(
         x=periodos_todos,
         y=valores_med,
@@ -324,7 +508,6 @@ else:
         connectgaps=False,
     ), row=1, col=1)
 
-    # Subplot 1: sequía - MÁXIMO
     fig.add_trace(go.Scatter(
         x=periodos_todos,
         y=valores_max,
@@ -335,7 +518,6 @@ else:
         connectgaps=False,
     ), row=1, col=1)
 
-    # Línea punteada roja en y=6
     fig.add_hline(
         y=6,
         line_dash="dash",
@@ -346,7 +528,6 @@ else:
         row=1, col=1,
     )
 
-    # Subplot 2: una franja por actividad
     for idx, act in enumerate(act_sel):
         color = color_para_actividad(act)
         emergencias_act = emergencias_por_act[act]
@@ -370,7 +551,6 @@ else:
             showlegend=True,
         ), row=2, col=1)
 
-    # Ejes
     fig.update_xaxes(
         tickangle=-45,
         tickmode='array',
@@ -440,4 +620,39 @@ else:
         )
     else:
         st.info("ℹ️ No hay resoluciones de emergencia para esta selección.")
+
+# ─────────────────────────────────────────────────────────────────────
+# EXPANDER DE DEPURACIÓN
+# ─────────────────────────────────────────────────────────────────────
+with st.expander("🔧 Ver datos crudos (diagnóstico del cruce)"):
+    st.write("### Base de sequía (mediana)")
+    st.write("**Provincias disponibles:**", sorted(df_med['PROVINCIA'].unique())[:20])
+    st.write(f"**Departamentos de '{prov_sel}':**",
+             sorted(df_med_prov['DEPARTAMENTO'].unique())[:30])
+
+    st.write("### Base de sequía (máximo)")
+    st.write(f"**Departamentos de '{prov_sel}':**",
+             sorted(df_max_prov['DEPARTAMENTO'].unique())[:30])
+
+    st.write("### Base de emergencia")
+    st.write("**Provincias disponibles:**", sorted(df_eme['PROVINCIA'].unique())[:20])
+    st.write(f"**Departamentos de '{prov_sel}':**",
+             sorted(df_eme[df_eme['_prov_norm'] == prov_norm]['DEPARTAMENTO'].unique())[:30])
+
+    st.write("### Cruce actual")
+    st.write(f"Departamento seleccionado: `{depto_sel}`")
+    st.write(f"Filas en emergencia: **{len(df_eme_depto)}**")
+    if len(df_eme_depto) > 0:
+        st.write("Actividades detectadas:", sorted(df_eme_depto['ACTIVIDAD'].unique()))
+
+    st.write("### Fechas")
+    st.write(f"**Períodos sequía ({len(periodos_med)}):**", periodos_med)
+    st.write(f"**Períodos emergencia ({len(periodos_eme)}):**", periodos_eme)
+    st.write(f"**Períodos totales ({len(periodos_todos)}):**", periodos_todos)
+
+    if GEOPACKAGE_OK and gdf_deptos is not None:
+        st.write("### GeoPackage")
+        st.write("**Columnas:**", list(gdf_deptos.columns))
+        st.write("**Cantidad de features:**", len(gdf_deptos))
+        st.write("**CRS:**", gdf_deptos.crs)
 
