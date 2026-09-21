@@ -26,7 +26,7 @@ st.markdown(
     <div style="font-size: 17px; line-height: 1.6; color: #444; margin-bottom: 1.5rem;">
         <b>Análisis de la intensidad y duración de la sequía en relación a las resoluciones de emergencia declaradas.</b><br> 
         El valor de sequía corresponde al valor acumulado trimestral, sumatoria de los valores de intensidad de sequía: leve = 1, moderada = 2 y severa = 3.<br>
-        Se representan dos curvas: el valor <b>mediana</b> y el valor <b>máximo</b> departamental.
+        Se representan valores agrupados por departamentos: <b>mediana</b> y <b>máximo</b>.
     </div>
     """,
     unsafe_allow_html=True,
@@ -270,21 +270,21 @@ key_actual = st.session_state["key_sel"]
 # ─────────────────────────────────────────────────────────────────────
 # MAPA COROPLÉTICO
 # ─────────────────────────────────────────────────────────────────────
-st.subheader("🗺️ Distribución espacial de la sequía")
-st.caption("Hacé clic en un departamento del mapa para graficar sus curvas.")
+st.subheader("Distribución espacial de la sequía en la región Noreste y Centro")
+st.caption("Clic en un departamento del mapa para graficar sus curvas")
 
 if GEOJSON_OK and geojson_deptos is not None:
 
     col_sel, col_mapa = st.columns([1, 4])
 
     with col_sel:
-        st.markdown("**Período**")
+        st.markdown("**Seleccionar mes**")
         periodo_mapa = st.selectbox(
             "Mes", periodos_med, index=0,
             key="periodo_mapa", label_visibility="collapsed",
         )
 
-        st.markdown("**Estadístico**")
+        st.markdown("**Seleccionar estadístico**")
         estadistico_mapa = st.radio(
             "Estadístico", ["Mediana", "Máximo"],
             key="estadistico_mapa", label_visibility="collapsed",
@@ -374,9 +374,8 @@ if GEOJSON_OK and geojson_deptos is not None:
                 st.rerun()
 
     st.caption(
-        f"Valor {estadistico_mapa.lower()} de intensidad de sequía acumulada — {periodo_mapa}. "
-        "Pasá el mouse sobre cada departamento para ver su nombre."
-    )
+        f"Valor {estadistico_mapa.lower()} departamental de intensidad de sequía acumulada — {periodo_mapa}. "
+           )
 else:
     st.info("ℹ️ Subí el archivo 'Departamentos_area_estudio_v3.geojson' al repositorio para ver el mapa.")
 
