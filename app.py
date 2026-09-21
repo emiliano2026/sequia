@@ -25,7 +25,7 @@ st.markdown(
     """
     <div style="font-size: 17px; line-height: 1.6; color: #444; margin-bottom: 1.5rem;">
         <b>Análisis de la intensidad y duración de la sequía en relación a las resoluciones de emergencia declaradas.</b><br> 
-        El valor de sequía corresponde al valor acumulado trimestral, sumatoria de los valores de intensidad de sequía: leve = 1, moderada = 2 y severa = 3.<br>
+        El valor de sequía corresponde al valor acumulado trimestral, sumatoria de los valores de intensidad de sequía: leve = 1, moderada = 2 y severa = 3, información generada por la Mesa Nacional de Monitoreo de Sequías (MNMS).<br>
         Se representan valores agrupados por departamentos: <b>mediana</b> y <b>máximo</b>.
     </div>
     """,
