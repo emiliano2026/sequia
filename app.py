@@ -87,18 +87,28 @@ def color_para_actividad(act):
     return '#cccccc'
 
 # ─────────────────────────────────────────────────────────────────────
-# COLORES POR CLUSTER (para el mapa)
+# PALETA DE SEQUÍA (0-9)
 # ─────────────────────────────────────────────────────────────────────
-COLORES_CLUSTER = {
-    0: '#e41a1c',  # rojo
-    1: '#377eb8',  # azul
-    2: '#4daf4a',  # verde
-    3: '#984ea3',  # violeta
-    4: '#ff7f00',  # naranja
-    5: '#a65628',  # marrón
-    6: '#f781bf',  # rosa
-    7: '#999999',  # gris
+PALETA_SEQUIA = {
+    0: '#FFFFFF',
+    1: '#FFFFCC',
+    2: '#FFEDA0',
+    3: '#FED976',
+    4: '#FEB24C',
+    5: '#FD8D3C',
+    6: '#FC4E2A',
+    7: '#E31A1C',
+    8: '#BD0026',
+    9: '#800026',
 }
+
+def color_sequia(valor):
+    if pd.isna(valor):
+        return '#E0E0E0'
+    try:
+        return PALETA_SEQUIA.get(int(round(float(valor))), '#999999')
+    except (ValueError, TypeError):
+        return '#999999'
 
 # ─────────────────────────────────────────────────────────────────────
 # CARGA DE DATOS
@@ -125,7 +135,7 @@ def load_data():
             df[p] = pd.to_numeric(df[p], errors='coerce')
         return df, periodos
 
-    # ── Base de sequía MEDIANA ──────────────────────────────────────
+    # Base de sequía MEDIANA
     df_med, periodos_med = leer_base_sequia(URL_MED, '_median')
     col_prov_med = buscar_columna(df_med, ['provincia'])
     col_dept_med = buscar_columna(df_med, ['departamento', 'nam', 'partido', 'municipio'])
@@ -137,7 +147,7 @@ def load_data():
     df_med['_prov_norm']   = df_med['PROVINCIA'].apply(normalizar_nombre)
     df_med['_dept_norm']   = df_med['DEPARTAMENTO'].apply(normalizar_nombre)
 
-    # ── Base de sequía MÁXIMO ──────────────────────────────────────
+    # Base de sequía MÁXIMO
     df_max, periodos_max = leer_base_sequia(URL_MAX, '_max')
     col_prov_max = buscar_columna(df_max, ['provincia'])
     col_dept_max = buscar_columna(df_max, ['departamento', 'nam', 'partido', 'municipio'])
@@ -149,7 +159,7 @@ def load_data():
     df_max['_prov_norm']   = df_max['PROVINCIA'].apply(normalizar_nombre)
     df_max['_dept_norm']   = df_max['DEPARTAMENTO'].apply(normalizar_nombre)
 
-    # ── Base de emergencia ──────────────────────────────────────────
+    # Base de emergencia
     df_eme = pd.read_csv(URL_EME, sep=',', skipinitialspace=True,
                          dtype=str, encoding='utf-8-sig')
     df_eme.columns = df_eme.columns.str.strip()
@@ -167,7 +177,6 @@ def load_data():
     df_eme['_prov_norm']   = df_eme['PROVINCIA'].apply(normalizar_nombre)
     df_eme['_dept_norm']   = df_eme['DEPARTAMENTO'].apply(normalizar_nombre)
 
-    # Unión de períodos (mediana + emergencia)
     periodos_todos = list(periodos_med)
     for p in periodos_eme:
         if p not in periodos_todos:
@@ -178,66 +187,155 @@ def load_data():
 df_med, df_max, df_eme, periodos_med, periodos_eme, periodos_todos = load_data()
 
 # ─────────────────────────────────────────────────────────────────────
-# CLUSTERING FIJO (K-MEANS sobre la mediana)
-# ─────────────────────────────────────────────────────────────────────
-@st.cache_data
-def calcular_clusters(df_med, periodos_med, k=5):
-    """Calcula clustering K-means sobre las series de mediana, con k fijo."""
-    from sklearn.preprocessing import StandardScaler
-    from sklearn.cluster import KMeans
-
-    # Matriz de series (solo filas sin NaN)
-    df_valid = df_med.dropna(subset=periodos_med).copy()
-    if df_valid.empty:
-        return df_med.assign(cluster=-1)
-
-    X = df_valid[periodos_med].values
-    scaler = StandardScaler()
-    X_z = scaler.fit_transform(X)
-
-    km = KMeans(n_clusters=k, n_init=10, random_state=42)
-    df_valid['cluster'] = km.fit_predict(X_z)
-
-    # Devolver todo el df_med con la columna cluster
-    df_out = df_med.merge(
-        df_valid[['PROVINCIA', 'DEPARTAMENTO', 'cluster']],
-        on=['PROVINCIA', 'DEPARTAMENTO'],
-        how='left'
-    )
-    df_out['cluster'] = df_out['cluster'].fillna(-1).astype(int)
-    return df_out
-
-df_med = calcular_clusters(df_med, periodos_med, k=5)
-
-# ─────────────────────────────────────────────────────────────────────
-# CARGA DEL GEOPACKAGE
+# CARGA DEL GEOPACKAGE (cacheada y simplificada para rendimiento)
 # ─────────────────────────────────────────────────────────────────────
 @st.cache_data
 def cargar_geopackage():
-    """Carga el GeoPackage de departamentos del área de estudio."""
     import geopandas as gpd
-
-    # Opción A: archivo local en el repo
     try:
         gdf = gpd.read_file("Departamentos_area_estudio.gpkg")
     except Exception:
-        # Opción B: descargar desde GitHub raw
         url = "https://raw.githubusercontent.com/emiliano2026/sequia/main/Departamentos_area_estudio.gpkg"
         gdf = gpd.read_file(url)
 
-    # Asegurar CRS WGS84 (lat/lon)
     if gdf.crs is not None and gdf.crs.to_string() != 'EPSG:4326':
         gdf = gdf.to_crs(epsg=4326)
 
-    return gdf
+    # Simplificar geometría para acelerar el render (0.005° ≈ 500m)
+    gdf['geometry'] = gdf.geometry.simplify(0.005, preserve_topology=True)
+
+    # Detectar columna de nombre
+    col_nombre = None
+    for patron in ['departamento', 'nam', 'nombre', 'partido', 'dpto']:
+        for c in gdf.columns:
+            if normalizar_nombre(patron) in normalizar_nombre(c):
+                col_nombre = c
+                break
+        if col_nombre:
+            break
+
+    gdf['_dept_norm'] = gdf[col_nombre].apply(normalizar_nombre)
+
+    # Calcular centroide una sola vez
+    try:
+        centro = gdf.geometry.unary_union.centroid
+        centro_lat, centro_lon = centro.y, centro.x
+    except Exception:
+        centro_lat, centro_lon = -36.0, -60.0
+
+    return gdf, col_nombre, (centro_lat, centro_lon)
 
 try:
-    gdf_deptos = cargar_geopackage()
+    gdf_deptos, col_nombre_geo, centro_mapa = cargar_geopackage()
     GEOPACKAGE_OK = True
 except Exception as e:
     st.sidebar.warning(f"⚠️ No se pudo cargar el GeoPackage: {e}")
     gdf_deptos = None
+    col_nombre_geo = None
+    centro_mapa = (-36.0, -60.0)
     GEOPACKAGE_OK = False
+
+# ─────────────────────────────────────────────────────────────────────
+# MAPA COROPLÉTICO INTERACTIVO
+# ─────────────────────────────────────────────────────────────────────
+st.subheader("🗺️ Distribución espacial de la sequía")
+
+if GEOPACKAGE_OK and gdf_deptos is not None and col_nombre_geo is not None:
+
+    # ── Selectores (a la izquierda) y mapa (a la derecha) ──────────
+    col_sel, col_mapa = st.columns([1, 4])
+
+    with col_sel:
+        st.markdown("**Período**")
+        periodo_mapa = st.selectbox(
+            "Mes",
+            periodos_med,
+            index=0,
+            key="periodo_mapa",
+            label_visibility="collapsed",
+        )
+
+        st.markdown("**Estadístico**")
+        estadistico_mapa = st.radio(
+            "Estadístico",
+            ["Mediana", "Máximo"],
+            key="estadistico_mapa",
+            label_visibility="collapsed",
+        )
+
+        st.markdown("---")
+        st.markdown("**Escala**")
+        # Leyenda vertical
+        leyenda_items = ""
+        for i in range(10):
+            leyenda_items += (
+                f'<div style="display:flex; align-items:center; margin-bottom:2px;">'
+                f'<div style="width:28px; height:20px; background:{PALETA_SEQUIA[i]}; '
+                f'border:1px solid #999;"></div>'
+                f'<span style="margin-left:8px; font-size:13px;">{i}</span>'
+                f'</div>'
+            )
+        leyenda_items += (
+            f'<div style="display:flex; align-items:center; margin-top:4px;">'
+            f'<div style="width:28px; height:20px; background:#E0E0E0; '
+            f'border:1px solid #999;"></div>'
+            f'<span style="margin-left:8px; font-size:13px;">Sin dato</span>'
+            f'</div>'
+        )
+        st.markdown(leyenda_items, unsafe_allow_html=True)
+
+    with col_mapa:
+        # Elegir base según estadístico
+        df_sel = df_med if estadistico_mapa == "Mediana" else df_max
+
+        # Merge: obtener el valor del mes seleccionado por departamento
+        df_val = df_sel[['_dept_norm', periodo_mapa]].copy()
+        df_val = df_val.rename(columns={periodo_mapa: 'valor'})
+        df_val = df_val.dropna(subset=['valor']).drop_duplicates('_dept_norm')
+
+        gdf_plot = gdf_deptos.merge(df_val, on='_dept_norm', how='left')
+
+        # Crear mapa
+        m = folium.Map(
+            location=list(centro_mapa),
+            zoom_start=5,
+            tiles="CartoDB positron",
+        )
+
+        def estilo(feature):
+            valor = feature['properties'].get('valor')
+            return {
+                'fillColor': color_sequia(valor),
+                'color': 'black',
+                'weight': 0.6,
+                'fillOpacity': 0.85,
+            }
+
+        # Preparar los datos de las features: necesitamos 'valor' en properties
+        geojson_data = gdf_plot.__geo_interface__
+        for feat, (_, row) in zip(geojson_data['features'], gdf_plot.iterrows()):
+            feat['properties']['valor'] = None if pd.isna(row['valor']) else float(row['valor'])
+
+        folium.GeoJson(
+            geojson_data,
+            name='Sequía',
+            style_function=estilo,
+            tooltip=folium.GeoJsonTooltip(
+                fields=[col_nombre_geo, 'valor'],
+                aliases=['Departamento:', f'{estadistico_mapa} {periodo_mapa}:'],
+                localize=True,
+            ),
+        ).add_to(m)
+
+        st_folium(m, width=None, height=520, key="mapa_sequia")
+
+    st.caption(
+        f"Valor {estadistico_mapa.lower()} de intensidad de sequía acumulada — {periodo_mapa}. "
+        "Pasá el mouse sobre cada departamento para ver su valor."
+    )
+
+else:
+    st.info("ℹ️ Subí el archivo 'Departamentos_area_estudio.gpkg' al repositorio para ver el mapa.")
 
 # ─────────────────────────────────────────────────────────────────────
 # SESSION STATE
@@ -248,124 +346,23 @@ if "prov_sel" not in st.session_state:
     st.session_state["prov_sel"] = None
 
 # ─────────────────────────────────────────────────────────────────────
-# MAPA INTERACTIVO
-# ─────────────────────────────────────────────────────────────────────
-st.subheader("🗺️ Mapa interactivo — clic en un departamento para filtrar")
-
-if GEOPACKAGE_OK and gdf_deptos is not None:
-    # Detectar columna de nombre en el GeoPackage
-    col_nombre_geo = buscar_columna(gdf_deptos, ['departamento', 'nam', 'nombre', 'partido', 'dpto'])
-    col_prov_geo   = buscar_columna(gdf_deptos, ['provincia'])
-
-    if col_nombre_geo is None:
-        st.error(f"❌ No se detectó columna de nombre en el GeoPackage. Columnas: {list(gdf_deptos.columns)}")
-    else:
-        # Normalizar nombres para el match
-        gdf_deptos['_dept_norm'] = gdf_deptos[col_nombre_geo].apply(normalizar_nombre)
-
-        # Unir con clusters
-        df_clusters = df_med[['PROVINCIA', 'DEPARTAMENTO', '_dept_norm', 'cluster']].drop_duplicates('_dept_norm')
-        gdf_deptos = gdf_deptos.merge(
-            df_clusters[['_dept_norm', 'cluster']],
-            on='_dept_norm',
-            how='left'
-        )
-        gdf_deptos['cluster'] = gdf_deptos['cluster'].fillna(-1).astype(int)
-
-        # Calcular centro del mapa
-        try:
-            centro = gdf_deptos.geometry.unary_union.centroid
-            centro_lat, centro_lon = centro.y, centro.x
-        except Exception:
-            centro_lat, centro_lon = -36.0, -60.0
-
-        # Crear mapa
-        m = folium.Map(
-            location=[centro_lat, centro_lon],
-            zoom_start=5,
-            tiles="OpenStreetMap"
-        )
-
-        # Función de estilo
-        def estilo_depto(feature):
-            cluster = feature['properties'].get('cluster', -1)
-            color = COLORES_CLUSTER.get(cluster, '#cccccc')
-            return {
-                'fillColor': color,
-                'color': 'black',
-                'weight': 0.8,
-                'fillOpacity': 0.65,
-            }
-
-        # Agregar capa GeoJSON
-        folium.GeoJson(
-            gdf_deptos.__geo_interface__,
-            name='Departamentos',
-            style_function=estilo_depto,
-            tooltip=folium.GeoJsonTooltip(
-                fields=[col_nombre_geo],
-                aliases=['Departamento:'],
-                localize=True,
-            ),
-        ).add_to(m)
-
-        # Renderizar y capturar clic
-        map_data = st_folium(
-            m,
-            width="100%",
-            height=500,
-            returned_objects=["last_active_drawing"],
-            key="mapa_deptos",
-        )
-
-        # Procesar clic
-        if map_data and map_data.get("last_active_drawing"):
-            props = map_data["last_active_drawing"]["properties"]
-            clicked_name = props.get(col_nombre_geo, "")
-            clicked_norm = normalizar_nombre(clicked_name)
-
-            # Buscar el nombre real en df_med
-            match_row = df_med[df_med['_dept_norm'] == clicked_norm]
-            if not match_row.empty:
-                nuevo_depto = match_row['DEPARTAMENTO'].iloc[0]
-                nueva_prov  = match_row['PROVINCIA'].iloc[0]
-                if st.session_state["depto_sel"] != nuevo_depto:
-                    st.session_state["depto_sel"] = nuevo_depto
-                    st.session_state["prov_sel"] = nueva_prov
-                    st.rerun()
-else:
-    st.info("ℹ️ Subí el archivo 'Departamentos_area_estudio.gpkg' al repositorio para ver el mapa.")
-
-# ─────────────────────────────────────────────────────────────────────
 # FILTROS
 # ─────────────────────────────────────────────────────────────────────
 st.sidebar.header("Filtrado de Datos")
 
 provincias = sorted(df_med['PROVINCIA'].dropna().unique())
-
-# Sincronizar prov_sel con session_state
 if st.session_state["prov_sel"] not in provincias:
     st.session_state["prov_sel"] = provincias[0] if provincias else None
 
-prov_sel = st.sidebar.selectbox(
-    "Provincia",
-    provincias,
-    key="prov_sel"
-)
+prov_sel = st.sidebar.selectbox("Provincia", provincias, key="prov_sel")
 prov_norm = normalizar_nombre(prov_sel)
 
 df_med_prov = df_med[df_med['_prov_norm'] == prov_norm]
 deptos = sorted(df_med_prov['DEPARTAMENTO'].dropna().unique())
-
-# Sincronizar depto_sel con session_state
 if st.session_state["depto_sel"] not in deptos:
     st.session_state["depto_sel"] = deptos[0] if deptos else None
 
-depto_sel = st.sidebar.selectbox(
-    "Departamento",
-    deptos,
-    key="depto_sel"
-)
+depto_sel = st.sidebar.selectbox("Departamento", deptos, key="depto_sel")
 depto_norm = normalizar_nombre(depto_sel)
 
 # Cruce robusto con emergencia
@@ -449,36 +446,27 @@ n_acts = len(act_sel)
 if n_acts == 0:
     fig = go.Figure()
     fig.add_trace(go.Scatter(
-        x=periodos_todos,
-        y=valores_med,
-        mode='lines+markers',
+        x=periodos_todos, y=valores_med, mode='lines+markers',
         name='Mediana departamental',
         line=dict(color='black', width=2.5),
         marker=dict(size=8, color='black'),
         connectgaps=False,
     ))
     fig.add_trace(go.Scatter(
-        x=periodos_todos,
-        y=valores_max,
-        mode='lines+markers',
+        x=periodos_todos, y=valores_max, mode='lines+markers',
         name='Máximo departamental',
         line=dict(color='#808080', width=2, dash='dot'),
         marker=dict(size=7, color='#808080', symbol='diamond'),
         connectgaps=False,
     ))
     fig.add_hline(
-        y=6,
-        line_dash="dash",
-        line_color="red",
-        line_width=1.8,
+        y=6, line_dash="dash", line_color="red", line_width=1.8,
         annotation_text="Límite sequía (6)",
         annotation_position="top right",
     )
     fig.update_layout(
         xaxis=dict(
-            title="Mes",
-            tickangle=-45,
-            tickmode='array',
+            title="Mes", tickangle=-45, tickmode='array',
             tickvals=list(range(len(periodos_todos))),
             ticktext=periodos_todos,
             range=[-0.5, len(periodos_todos) - 0.5],
@@ -491,17 +479,13 @@ if n_acts == 0:
     )
 else:
     fig = make_subplots(
-        rows=2, cols=1,
-        shared_xaxes=True,
-        row_heights=[0.72, 0.28],
-        vertical_spacing=0.04,
+        rows=2, cols=1, shared_xaxes=True,
+        row_heights=[0.72, 0.28], vertical_spacing=0.04,
         subplot_titles=("", "Resoluciones Nacionales de Emergencia por tipo de Actividad"),
     )
 
     fig.add_trace(go.Scatter(
-        x=periodos_todos,
-        y=valores_med,
-        mode='lines+markers',
+        x=periodos_todos, y=valores_med, mode='lines+markers',
         name='Mediana departamental',
         line=dict(color='black', width=2.5),
         marker=dict(size=8, color='black'),
@@ -509,9 +493,7 @@ else:
     ), row=1, col=1)
 
     fig.add_trace(go.Scatter(
-        x=periodos_todos,
-        y=valores_max,
-        mode='lines+markers',
+        x=periodos_todos, y=valores_max, mode='lines+markers',
         name='Máximo departamental',
         line=dict(color='#808080', width=2, dash='dot'),
         marker=dict(size=7, color='#808080', symbol='diamond'),
@@ -519,10 +501,7 @@ else:
     ), row=1, col=1)
 
     fig.add_hline(
-        y=6,
-        line_dash="dash",
-        line_color="red",
-        line_width=1.8,
+        y=6, line_dash="dash", line_color="red", line_width=1.8,
         annotation_text="Límite del protocolo de sequía (6)",
         annotation_position="top right",
         row=1, col=1,
@@ -540,10 +519,7 @@ else:
             for x in xs
         ]
         fig.add_trace(go.Scatter(
-            x=xs,
-            y=ys,
-            mode='markers',
-            name=act,
+            x=xs, y=ys, mode='markers', name=act,
             marker=dict(symbol='square', size=22, color=color,
                         line=dict(color='white', width=1)),
             text=hover_text,
@@ -552,17 +528,14 @@ else:
         ), row=2, col=1)
 
     fig.update_xaxes(
-        tickangle=-45,
-        tickmode='array',
+        tickangle=-45, tickmode='array',
         tickvals=list(range(len(periodos_todos))),
         ticktext=periodos_todos,
         range=[-0.5, len(periodos_todos) - 0.5],
         row=1, col=1,
     )
     fig.update_xaxes(
-        title="Mes",
-        tickangle=-45,
-        tickmode='array',
+        title="Mes", tickangle=-45, tickmode='array',
         tickvals=list(range(len(periodos_todos))),
         ticktext=periodos_todos,
         range=[-0.5, len(periodos_todos) - 0.5],
@@ -570,9 +543,7 @@ else:
     )
     fig.update_yaxes(
         title="Valor acumulado de sequía (0-9)",
-        range=[-0.5, 9.5],
-        dtick=1,
-        row=1, col=1,
+        range=[-0.5, 9.5], dtick=1, row=1, col=1,
     )
     fig.update_yaxes(
         tickmode='array',
@@ -583,8 +554,7 @@ else:
     )
 
     fig.update_layout(
-        template='plotly_white',
-        height=680,
+        template='plotly_white', height=680,
         margin=dict(l=40, r=40, t=40, b=80),
         legend=dict(orientation='h', y=-0.18, x=0.5, xanchor='center'),
     )
@@ -652,6 +622,6 @@ with st.expander("🔧 Ver datos crudos (diagnóstico del cruce)"):
 
     if GEOPACKAGE_OK and gdf_deptos is not None:
         st.write("### GeoPackage")
-        st.write("**Columnas:**", list(gdf_deptos.columns))
+        st.write("**Columna de nombre detectada:**", col_nombre_geo)
         st.write("**Cantidad de features:**", len(gdf_deptos))
         st.write("**CRS:**", gdf_deptos.crs)
