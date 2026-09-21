@@ -16,7 +16,7 @@ try:
 except:
     st.sidebar.warning("Logo no encontrado. Subí 'LogoIIPAC.jpg'.")
 
-st.title("☀️ Dashboard de Sequía 2020-2023")
+st.title("Dashboard de Sequía 2020-2023")
 st.caption("Intensidad de sequía y resoluciones de emergencia agropecuaria")
 
 # ─────────────────────────────────────────────────────────────────────
@@ -149,15 +149,15 @@ df_seq, df_eme, periodos_seq, periodos_eme, periodos_todos = load_data()
 # ─────────────────────────────────────────────────────────────────────
 # FILTROS
 # ─────────────────────────────────────────────────────────────────────
-st.sidebar.header("🔍 Filtros")
+st.sidebar.header("🔍 Filtrar")
 
 provincias = sorted(df_seq['PROVINCIA'].dropna().unique())
-prov_sel = st.sidebar.selectbox("📍 Provincia", provincias)
+prov_sel = st.sidebar.selectbox("Provincia", provincias)
 prov_norm = normalizar_nombre(prov_sel)
 
 df_seq_prov = df_seq[df_seq['_prov_norm'] == prov_norm]
 deptos = sorted(df_seq_prov['DEPARTAMENTO'].dropna().unique())
-depto_sel = st.sidebar.selectbox("🏘️ Departamento", deptos)
+depto_sel = st.sidebar.selectbox("Departamento", deptos)
 depto_norm = normalizar_nombre(depto_sel)
 
 # Cruce robusto con emergencia
@@ -181,7 +181,7 @@ else:
     actividades = sorted(df_eme_depto['ACTIVIDAD'].dropna().unique())
 
 act_sel = st.sidebar.multiselect(
-    "🌾 Actividades (opcional)",
+    "Actividades (opcional)",
     actividades,
     default=actividades if actividades else []
 )
@@ -257,7 +257,7 @@ if n_acts == 0:
             ticktext=periodos_todos,
             range=[-0.5, len(periodos_todos) - 0.5],
         ),
-        yaxis=dict(title="Intensidad de sequía (0-9)", range=[-0.5, 9.5], dtick=1),
+        yaxis=dict(title="Valor acumulado trimestral de sequía (0-9)", range=[-0.5, 9.5], dtick=1),
         template='plotly_white',
         height=500,
         margin=dict(l=40, r=40, t=40, b=80),
@@ -269,7 +269,7 @@ else:
         shared_xaxes=True,
         row_heights=[0.72, 0.28],
         vertical_spacing=0.04,
-        subplot_titles=("", "Resoluciones de emergencia por actividad"),
+        subplot_titles=("", "Resoluciones Nacionales de emergencia por tipo de Actividad"),
     )
 
     # Subplot 1: sequía
@@ -277,7 +277,7 @@ else:
         x=periodos_todos,
         y=valores_seq,
         mode='lines+markers',
-        name='Intensidad de sequía',
+        name='Valor acumulado de sequía',
         line=dict(color='black', width=2.5),
         marker=dict(size=8, color='black'),
         connectgaps=False,
@@ -289,7 +289,7 @@ else:
         line_dash="dash",
         line_color="red",
         line_width=1.8,
-        annotation_text="Límite sequía (6)",
+        annotation_text="Límite del protocolo de sequía (6)",
         annotation_position="top right",
         row=1, col=1,
     )
@@ -372,7 +372,7 @@ st.plotly_chart(fig, use_container_width=True)
 # ─────────────────────────────────────────────────────────────────────
 # TABLA DE RESOLUCIONES
 # ─────────────────────────────────────────────────────────────────────
-st.subheader("📋 Resoluciones de emergencia declaradas")
+st.subheader("Resoluciones de emergencia declaradas")
 
 filas = []
 for act in act_sel:
