@@ -3,4 +3,4 @@ pandas
 plotly
 numpy
 folium
-streamlit-folium
+streamlit-folium>=0.15.0
