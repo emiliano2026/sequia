@@ -20,8 +20,7 @@ st.title("Análisis de la Sequía 2020-2023 (Evento Niña)")
 st.markdown(
     """
     <div style="font-size: 17px; line-height: 1.6; color: #444; margin-bottom: 1.5rem;">
-        <b>Análisis de la intensidad y duración de la sequía en relación a las resoluciones de emergencia declaradas.</b><br> 
-        <b>Región Noreste y Centro según regionalización del SINAGIR.</b><br> 
+        <b>Análisis de la intensidad y duración de la sequía en relación a las resoluciones de emergencia declaradas, para la región Noreste y Centro según regionalización del SINAGIR.</b><br> 
         El valor de sequía corresponde al valor acumulado trimestral, sumatoria de los valores de intensidad de sequía: leve = 1, moderada = 2 y severa = 3.<br>
         Se representan dos curvas: el valor <b>mediana</b> y el valor <b>máximo</b> departamental.
     </div>
