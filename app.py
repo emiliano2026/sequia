@@ -17,7 +17,9 @@ except:
     st.sidebar.warning("Logo no encontrado. Subí 'LogoIIPAC.jpg'.")
 
 st.title("Dashboard de Sequía 2020-2023")
-st.caption("Intensidad de sequía y resoluciones de emergencia agropecuaria")
+st.caption("Análisis de la intensidad y duración de la sequía en relación a las resoluciones de emergencia declaradas. 
+El valor de sequía representado corresponde al valor acumulado trimestral, sumatoria de los valores de intensidad de sequía leve=1, moderada=2 y severa=3.
+El valor representado en el gráfico sintetiza intensidad y duración de la sequía")
 
 # ─────────────────────────────────────────────────────────────────────
 # FUNCIONES AUXILIARES
@@ -149,7 +151,7 @@ df_seq, df_eme, periodos_seq, periodos_eme, periodos_todos = load_data()
 # ─────────────────────────────────────────────────────────────────────
 # FILTROS
 # ─────────────────────────────────────────────────────────────────────
-st.sidebar.header("🔍 Filtrar")
+st.sidebar.header("Filtrado de Datos")
 
 provincias = sorted(df_seq['PROVINCIA'].dropna().unique())
 prov_sel = st.sidebar.selectbox("Provincia", provincias)
@@ -181,7 +183,7 @@ else:
     actividades = sorted(df_eme_depto['ACTIVIDAD'].dropna().unique())
 
 act_sel = st.sidebar.multiselect(
-    "Actividades (opcional)",
+    "Selección de Actividades",
     actividades,
     default=actividades if actividades else []
 )
@@ -224,7 +226,7 @@ if act_sel and not df_eme_depto.empty:
 # ─────────────────────────────────────────────────────────────────────
 # GRÁFICO
 # ─────────────────────────────────────────────────────────────────────
-st.subheader(f"📈 Evolución de la sequía — {depto_sel} ({prov_sel})")
+st.subheader(f"Evolución de la sequía — {depto_sel} ({prov_sel})")
 
 n_acts = len(act_sel)
 
@@ -257,7 +259,7 @@ if n_acts == 0:
             ticktext=periodos_todos,
             range=[-0.5, len(periodos_todos) - 0.5],
         ),
-        yaxis=dict(title="Valor acumulado trimestral de sequía (0-9)", range=[-0.5, 9.5], dtick=1),
+        yaxis=dict(title="Valor acumulado de sequía (0-9)", range=[-0.5, 9.5], dtick=1),
         template='plotly_white',
         height=500,
         margin=dict(l=40, r=40, t=40, b=80),
@@ -269,7 +271,7 @@ else:
         shared_xaxes=True,
         row_heights=[0.72, 0.28],
         vertical_spacing=0.04,
-        subplot_titles=("", "Resoluciones Nacionales de emergencia por tipo de Actividad"),
+        subplot_titles=("", "Resoluciones Nacionales de Emergencia por tipo de Actividad"),
     )
 
     # Subplot 1: sequía
@@ -342,7 +344,7 @@ else:
         row=2, col=1,
     )
     fig.update_yaxes(
-        title="Intensidad de sequía (0-9)",
+        title="Valor acumulado de sequía (0-9)",
         range=[-0.5, 9.5],
         dtick=1,
         row=1, col=1,
