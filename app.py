@@ -316,22 +316,22 @@ if GEOJSON_OK and geojson_deptos is not None:
         df_val = df_val.dropna(subset=['valor']).drop_duplicates('_key')
         valores_por_key = dict(zip(df_val['_key'], df_val['valor']))
 
-m = folium.Map(
-    location=list(centro_mapa),
-    zoom_start=5,
-    tiles=None,  # quitamos el basemap por defecto
-)
+        m = folium.Map(
+            location=list(centro_mapa),
+            zoom_start=5,
+            tiles=None,
+        )
 
-# ARGENMAP gris (IGN - Instituto Geográfico Nacional de Argentina)
-folium.TileLayer(
-    tiles='https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/argenmap_gris@EPSG%3A900913@png/{z}/{x}/{y}.png',
-    attr='Instituto Geográfico Nacional — Argenmap gris',
-    name='Argenmap gris',
-    overlay=False,
-    control=True,
-    tms=True,
-    max_zoom=18,
-).add_to(m)
+        # ARGENMAP gris (IGN - Instituto Geográfico Nacional de Argentina)
+        folium.TileLayer(
+            tiles='https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/argenmap_gris@EPSG%3A900913@png/{z}/{x}/{y}.png',
+            attr='Instituto Geográfico Nacional — Argenmap gris',
+            name='Argenmap gris',
+            overlay=False,
+            control=True,
+            tms=True,
+            max_zoom=18,
+        ).add_to(m)
 
         def estilo(feature):
             key = feature['properties'].get('_key', '')
