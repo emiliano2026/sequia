@@ -407,29 +407,3 @@ else:
     else:
         st.info("ℹ️ No hay resoluciones de emergencia para esta selección.")
 
-# ─────────────────────────────────────────────────────────────────────
-# EXPANDER DE DEPURACIÓN
-# ─────────────────────────────────────────────────────────────────────
-with st.expander("🔧 Ver datos crudos (diagnóstico del cruce)"):
-    st.write("### Base de sequía")
-    st.write("**Provincias disponibles (base sequía):**", sorted(df_seq['PROVINCIA'].unique())[:20])
-    st.write(f"**Departamentos de '{prov_sel}' (base sequía):**",
-             sorted(df_seq_prov['DEPARTAMENTO'].unique())[:30])
-
-    st.write("### Base de emergencia")
-    st.write("**Provincias disponibles (base emergencia):**",
-             sorted(df_eme['PROVINCIA'].unique())[:20])
-    st.write(f"**Departamentos de '{prov_sel}' (base emergencia):**",
-             sorted(df_eme[df_eme['_prov_norm'] == prov_norm]['DEPARTAMENTO'].unique())[:30])
-
-    st.write("### Cruce actual")
-    st.write(f"Departamento seleccionado (sequía): `{depto_sel}`")
-    st.write(f"Departamento normalizado: `{depto_norm}`")
-    st.write(f"Filas encontradas en emergencia: **{len(df_eme_depto)}**")
-    if len(df_eme_depto) > 0:
-        st.write("Actividades detectadas:", sorted(df_eme_depto['ACTIVIDAD'].unique()))
-
-    st.write("### Fechas")
-    st.write(f"**Períodos sequía ({len(periodos_seq)}):**", periodos_seq)
-    st.write(f"**Períodos emergencia ({len(periodos_eme)}):**", periodos_eme)
-    st.write(f"**Períodos totales ({len(periodos_todos)}):**", periodos_todos)
