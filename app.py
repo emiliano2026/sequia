@@ -22,12 +22,11 @@ st.markdown(
     <div style="font-size: 17px; line-height: 1.6; color: #444; margin-bottom: 1.5rem;">
         <b>Análisis de la intensidad y duración de la sequía en relación a las resoluciones de emergencia declaradas.</b><br> 
         El valor de sequía corresponde al valor acumulado trimestral, sumatoria de los valores de intensidad de sequía: leve = 1, moderada = 2 y severa = 3.<br>
-        El valor representado en el gráfico sintetiza la intensidad y duración de la sequía con el valor de la mediana departamental.
+        Se representan dos curvas: el valor <b>mediana</b> y el valor <b>máximo</b> departamental.
     </div>
     """,
     unsafe_allow_html=True,
 )
-
 
 # ─────────────────────────────────────────────────────────────────────
 # FUNCIONES AUXILIARES
@@ -67,15 +66,15 @@ def match_departamento(depto_seq, deptos_eme_norm):
 # COLORES POR ACTIVIDAD
 # ─────────────────────────────────────────────────────────────────────
 COLORES_ACTIVIDAD = {
-    'agriculturafamiliar': '#808080',   # gris (debe ir ANTES de 'agricultura')
-    'agricultura': '#90EE90',            # verde claro
-    'ganaderia': '#8B4513',              # marrón
-    'apicultura': '#FFD700',             # amarillo
-    'fruticultura': '#FF0000',           # rojo
-    'horticultura': '#FFA500',           # naranja
-    'psicultura': '#87CEEB',             # celeste
-    'piscicultura': '#87CEEB',           # celeste (alias)
-    'silvicultura': '#006400',           # verde oscuro
+    'agriculturafamiliar': '#808080',
+    'agricultura': '#90EE90',
+    'ganaderia': '#8B4513',
+    'apicultura': '#FFD700',
+    'fruticultura': '#FF0000',
+    'horticultura': '#FFA500',
+    'psicultura': '#87CEEB',
+    'piscicultura': '#87CEEB',
+    'silvicultura': '#006400',
 }
 
 def color_para_actividad(act):
@@ -90,93 +89,99 @@ def color_para_actividad(act):
 # ─────────────────────────────────────────────────────────────────────
 @st.cache_data
 def load_data():
-    URL_SEQ = "https://raw.githubusercontent.com/emiliano2026/sequia/main/BBDD_sequia_mediana_v2.csv"
+    URL_MED = "https://raw.githubusercontent.com/emiliano2026/sequia/main/BBDD_sequia_mediana_v2.csv"
+    URL_MAX = "https://raw.githubusercontent.com/emiliano2026/sequia/main/BBDD_sequia_maximo.csv"
     URL_EME = "https://raw.githubusercontent.com/emiliano2026/sequia/main/BBDD_todo_V2.csv"
 
-    # ── Base de sequía ──────────────────────────────────────────────
-    df_seq = pd.read_csv(URL_SEQ, sep=',', skipinitialspace=True,
+    # Función auxiliar para leer y estandarizar una base de sequía
+    def leer_base_sequia(url, sufijo):
+        df = pd.read_csv(url, sep=',', skipinitialspace=True,
                          dtype=str, encoding='utf-8-sig')
-    df_seq.columns = df_seq.columns.str.strip()
+        df.columns = df.columns.str.strip()
+        # Mapear columnas MES_AAAA_sufijo -> MES_AAAA
+        cols = [c for c in df.columns if c.endswith(sufijo)]
+        mapa = {}
+        for c in cols:
+            m = re.match(r'([A-Z]{3})(\d{4})' + sufijo, c)
+            if m:
+                mapa[c] = f"{m.group(1)}_{m.group(2)}"
+        df = df.rename(columns=mapa)
+        periodos = list(mapa.values())
+        for p in periodos:
+            df[p] = pd.to_numeric(df[p], errors='coerce')
+        return df, periodos
 
-    cols_seq = [c for c in df_seq.columns if c.endswith('_median')]
-    mapa_seq = {}
-    for c in cols_seq:
-        m = re.match(r'([A-Z]{3})(\d{4})_median', c)
-        if m:
-            mapa_seq[c] = f"{m.group(1)}_{m.group(2)}"
-    df_seq = df_seq.rename(columns=mapa_seq)
-    periodos_seq = list(mapa_seq.values())  # ← respeta orden del CSV
-
-    for p in periodos_seq:
-        df_seq[p] = pd.to_numeric(df_seq[p], errors='coerce')
-
-    col_prov_seq = buscar_columna(df_seq, ['provincia'])
-    col_dept_seq = buscar_columna(df_seq, ['departamento', 'nam', 'partido', 'municipio'])
-
-    if not col_prov_seq or not col_dept_seq:
-        st.error("❌ No se detectaron columnas de PROVINCIA/DEPARTAMENTO en la base de sequía.")
-        st.write("**Columnas disponibles:**", list(df_seq.columns))
+    # ── Base de sequía MEDIANA ──────────────────────────────────────
+    df_med, periodos_med = leer_base_sequia(URL_MED, '_median')
+    col_prov_med = buscar_columna(df_med, ['provincia'])
+    col_dept_med = buscar_columna(df_med, ['departamento', 'nam', 'partido', 'municipio'])
+    if not col_prov_med or not col_dept_med:
+        st.error("❌ No se detectaron columnas de PROVINCIA/DEPARTAMENTO en la base de mediana.")
         st.stop()
+    df_med['PROVINCIA']    = df_med[col_prov_med].astype(str).str.strip()
+    df_med['DEPARTAMENTO'] = df_med[col_dept_med].astype(str).str.strip()
+    df_med['_prov_norm']   = df_med['PROVINCIA'].apply(normalizar_nombre)
+    df_med['_dept_norm']   = df_med['DEPARTAMENTO'].apply(normalizar_nombre)
 
-    df_seq['PROVINCIA']    = df_seq[col_prov_seq].astype(str).str.strip()
-    df_seq['DEPARTAMENTO'] = df_seq[col_dept_seq].astype(str).str.strip()
-    df_seq['_prov_norm']   = df_seq['PROVINCIA'].apply(normalizar_nombre)
-    df_seq['_dept_norm']   = df_seq['DEPARTAMENTO'].apply(normalizar_nombre)
+    # ── Base de sequía MÁXIMO ──────────────────────────────────────
+    df_max, periodos_max = leer_base_sequia(URL_MAX, '_max')
+    col_prov_max = buscar_columna(df_max, ['provincia'])
+    col_dept_max = buscar_columna(df_max, ['departamento', 'nam', 'partido', 'municipio'])
+    if not col_prov_max or not col_dept_max:
+        st.error("❌ No se detectaron columnas de PROVINCIA/DEPARTAMENTO en la base de máximo.")
+        st.stop()
+    df_max['PROVINCIA']    = df_max[col_prov_max].astype(str).str.strip()
+    df_max['DEPARTAMENTO'] = df_max[col_dept_max].astype(str).str.strip()
+    df_max['_prov_norm']   = df_max['PROVINCIA'].apply(normalizar_nombre)
+    df_max['_dept_norm']   = df_max['DEPARTAMENTO'].apply(normalizar_nombre)
 
     # ── Base de emergencia ──────────────────────────────────────────
     df_eme = pd.read_csv(URL_EME, sep=',', skipinitialspace=True,
                          dtype=str, encoding='utf-8-sig')
     df_eme.columns = df_eme.columns.str.strip()
-
     cols_eme = [c for c in df_eme.columns if re.match(r'^[A-Z]{3}_\d{4}$', c)]
-    periodos_eme = list(cols_eme)  # ← respeta orden del CSV
-
+    periodos_eme = list(cols_eme)
     col_prov_eme = buscar_columna(df_eme, ['provincia'])
     col_dept_eme = buscar_columna(df_eme, ['departamento', 'nam', 'partido', 'municipio'])
     col_act_eme  = buscar_columna(df_eme, ['actividad'])
-
     if not col_prov_eme or not col_dept_eme or not col_act_eme:
         st.error("❌ No se detectaron todas las columnas necesarias en BBDD_todo_V2.")
-        st.write("**Columnas detectadas:**", list(df_eme.columns))
         st.stop()
-
     df_eme['PROVINCIA']    = df_eme[col_prov_eme].astype(str).str.strip()
     df_eme['DEPARTAMENTO'] = df_eme[col_dept_eme].astype(str).str.strip()
     df_eme['ACTIVIDAD']    = df_eme[col_act_eme].astype(str).str.strip()
     df_eme['_prov_norm']   = df_eme['PROVINCIA'].apply(normalizar_nombre)
     df_eme['_dept_norm']   = df_eme['DEPARTAMENTO'].apply(normalizar_nombre)
 
-    # Unión de períodos respetando orden
-    periodos_todos = list(periodos_seq)
+    # Unión de períodos (mediana + emergencia; máximo tiene los mismos)
+    periodos_todos = list(periodos_med)
     for p in periodos_eme:
         if p not in periodos_todos:
             periodos_todos.append(p)
 
-    return df_seq, df_eme, periodos_seq, periodos_eme, periodos_todos
+    return df_med, df_max, df_eme, periodos_med, periodos_eme, periodos_todos
 
-df_seq, df_eme, periodos_seq, periodos_eme, periodos_todos = load_data()
+df_med, df_max, df_eme, periodos_med, periodos_eme, periodos_todos = load_data()
 
 # ─────────────────────────────────────────────────────────────────────
 # FILTROS
 # ─────────────────────────────────────────────────────────────────────
 st.sidebar.header("Filtrado de Datos")
 
-provincias = sorted(df_seq['PROVINCIA'].dropna().unique())
+provincias = sorted(df_med['PROVINCIA'].dropna().unique())
 prov_sel = st.sidebar.selectbox("Provincia", provincias)
 prov_norm = normalizar_nombre(prov_sel)
 
-df_seq_prov = df_seq[df_seq['_prov_norm'] == prov_norm]
-deptos = sorted(df_seq_prov['DEPARTAMENTO'].dropna().unique())
+df_med_prov = df_med[df_med['_prov_norm'] == prov_norm]
+deptos = sorted(df_med_prov['DEPARTAMENTO'].dropna().unique())
 depto_sel = st.sidebar.selectbox("Departamento", deptos)
 depto_norm = normalizar_nombre(depto_sel)
 
 # Cruce robusto con emergencia
 mask_eme = (df_eme['_prov_norm'] == prov_norm) & (df_eme['_dept_norm'] == depto_norm)
 df_eme_depto = df_eme[mask_eme]
-
 if df_eme_depto.empty:
     df_eme_depto = df_eme[df_eme['_dept_norm'] == depto_norm]
-
 if df_eme_depto.empty:
     deptos_eme_unicos = df_eme[['DEPARTAMENTO', '_dept_norm']].drop_duplicates()
     deptos_eme_dict = dict(zip(deptos_eme_unicos['DEPARTAMENTO'], deptos_eme_unicos['_dept_norm']))
@@ -197,23 +202,38 @@ act_sel = st.sidebar.multiselect(
 )
 
 # ─────────────────────────────────────────────────────────────────────
-# DATOS DE SEQUÍA
+# DATOS DE SEQUÍA (MEDIANA Y MÁXIMO)
 # ─────────────────────────────────────────────────────────────────────
-fila_seq = df_seq_prov[df_seq_prov['DEPARTAMENTO'] == depto_sel]
-if fila_seq.empty:
-    st.warning(f"⚠️ No hay datos de sequía para {depto_sel} ({prov_sel}).")
+fila_med = df_med_prov[df_med_prov['DEPARTAMENTO'] == depto_sel]
+if fila_med.empty:
+    st.warning(f"⚠️ No hay datos de sequía (mediana) para {depto_sel} ({prov_sel}).")
     st.stop()
 
-valores_seq = []
+# Alinear valores de mediana con periodos_todos
+valores_med = []
 for p in periodos_todos:
-    if p in periodos_seq:
-        v = fila_seq[p].iloc[0]
-        valores_seq.append(v if pd.notna(v) else np.nan)
+    if p in periodos_med:
+        v = fila_med[p].iloc[0]
+        valores_med.append(v if pd.notna(v) else np.nan)
     else:
-        valores_seq.append(np.nan)
+        valores_med.append(np.nan)
+
+# Buscar la fila de máximo (mismo departamento)
+df_max_prov = df_max[df_max['_prov_norm'] == prov_norm]
+fila_max = df_max_prov[df_max_prov['DEPARTAMENTO'] == depto_sel]
+valores_max = []
+if fila_max.empty:
+    valores_max = [np.nan] * len(periodos_todos)
+else:
+    for p in periodos_todos:
+        if p in periodos_med:  # los períodos de máximo son los mismos
+            v = fila_max[p].iloc[0]
+            valores_max.append(v if pd.notna(v) else np.nan)
+        else:
+            valores_max.append(np.nan)
 
 # ─────────────────────────────────────────────────────────────────────
-# EMERGENCIAS: diccionario {actividad: {periodo: resolución}}
+# EMERGENCIAS
 # ─────────────────────────────────────────────────────────────────────
 emergencias_por_act = {}
 for act in act_sel:
@@ -227,7 +247,6 @@ if act_sel and not df_eme_depto.empty:
             if p in periodos_eme:
                 val = str(row[p]).strip()
                 if val and val.lower() not in ('nan', 'none', '', 'null'):
-                    # Solo guardar si no está ya (evitar duplicados por filas repetidas)
                     if p not in emergencias_por_act[act]:
                         emergencias_por_act[act][p] = val
 
@@ -239,15 +258,26 @@ st.subheader(f"Evolución de la sequía — {depto_sel} ({prov_sel})")
 n_acts = len(act_sel)
 
 if n_acts == 0:
-    # ── Solo gráfico de sequía ───────────────────────────────────────
+    # ── Solo gráfico de sequía (mediana y máximo) ───────────────────
     fig = go.Figure()
+    # Curva MEDIANA
     fig.add_trace(go.Scatter(
         x=periodos_todos,
-        y=valores_seq,
+        y=valores_med,
         mode='lines+markers',
-        name='Intensidad de sequía',
+        name='Mediana departamental',
         line=dict(color='black', width=2.5),
         marker=dict(size=8, color='black'),
+        connectgaps=False,
+    ))
+    # Curva MÁXIMO
+    fig.add_trace(go.Scatter(
+        x=periodos_todos,
+        y=valores_max,
+        mode='lines+markers',
+        name='Máximo departamental',
+        line=dict(color='#d62728', width=2, dash='dot'),
+        marker=dict(size=7, color='#d62728', symbol='diamond'),
         connectgaps=False,
     ))
     fig.add_hline(
@@ -271,6 +301,7 @@ if n_acts == 0:
         template='plotly_white',
         height=500,
         margin=dict(l=40, r=40, t=40, b=80),
+        legend=dict(orientation='h', y=-0.25, x=0.5, xanchor='center'),
     )
 else:
     # ── Con subplots: sequía arriba, emergencias abajo ───────────────
@@ -282,14 +313,25 @@ else:
         subplot_titles=("", "Resoluciones Nacionales de Emergencia por tipo de Actividad"),
     )
 
-    # Subplot 1: sequía
+    # Subplot 1: sequía - MEDIANA
     fig.add_trace(go.Scatter(
         x=periodos_todos,
-        y=valores_seq,
+        y=valores_med,
         mode='lines+markers',
-        name='Valor acumulado de sequía',
+        name='Mediana departamental',
         line=dict(color='black', width=2.5),
         marker=dict(size=8, color='black'),
+        connectgaps=False,
+    ), row=1, col=1)
+
+    # Subplot 1: sequía - MÁXIMO
+    fig.add_trace(go.Scatter(
+        x=periodos_todos,
+        y=valores_max,
+        mode='lines+markers',
+        name='Máximo departamental',
+        line=dict(color='#d62728', width=2, dash='dot'),
+        marker=dict(size=7, color='#d62728', symbol='diamond'),
         connectgaps=False,
     ), row=1, col=1)
 
@@ -309,7 +351,6 @@ else:
         color = color_para_actividad(act)
         emergencias_act = emergencias_por_act[act]
         if not emergencias_act:
-            # Igual mostramos la franja vacía con su nombre en el eje Y
             continue
         xs = list(emergencias_act.keys())
         ys = [idx] * len(xs)
@@ -322,12 +363,8 @@ else:
             y=ys,
             mode='markers',
             name=act,
-            marker=dict(
-                symbol='square',
-                size=22,
-                color=color,
-                line=dict(color='white', width=1),
-            ),
+            marker=dict(symbol='square', size=22, color=color,
+                        line=dict(color='white', width=1)),
             text=hover_text,
             hovertemplate='%{text}<extra></extra>',
             showlegend=True,
@@ -369,12 +406,7 @@ else:
         template='plotly_white',
         height=680,
         margin=dict(l=40, r=40, t=40, b=80),
-        legend=dict(
-            orientation='h',
-            y=-0.18,
-            x=0.5,
-            xanchor='center',
-        ),
+        legend=dict(orientation='h', y=-0.18, x=0.5, xanchor='center'),
     )
 
 st.plotly_chart(fig, use_container_width=True)
@@ -387,14 +419,16 @@ st.subheader("Resoluciones de emergencia declaradas")
 filas = []
 for act in act_sel:
     for p, res in emergencias_por_act[act].items():
-        filas.append({'Mes': p, 'Actividad': act, 'Resolución': res})
+        filas.append({
+            'Mes': p,
+            'Actividad': act,
+            'Resolución': res,
+            'Intensidad (mediana)': valores_med[periodos_todos.index(p)],
+            'Intensidad (máximo)': valores_max[periodos_todos.index(p)],
+        })
 
 if filas:
     df_tabla = pd.DataFrame(filas)
-    df_tabla['Intensidad'] = df_tabla['Mes'].apply(
-        lambda m: valores_seq[periodos_todos.index(m)]
-    )
-    # Ordenar por fecha
     df_tabla['_orden'] = df_tabla['Mes'].apply(lambda m: periodos_todos.index(m))
     df_tabla = df_tabla.sort_values('_orden').drop(columns='_orden')
     st.dataframe(df_tabla, use_container_width=True, hide_index=True)
