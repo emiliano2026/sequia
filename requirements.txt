@@ -2,3 +2,7 @@ streamlit
 pandas
 plotly
 numpy
+geopandas
+folium
+streamlit-folium
+scikit-learn
