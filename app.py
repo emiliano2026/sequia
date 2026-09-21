@@ -16,7 +16,7 @@ try:
 except:
     st.sidebar.warning("Logo no encontrado. Subí 'LogoIIPAC.jpg'.")
 
-st.title("Análisis de la Sequía 2020-2023 (Evento Niño)")
+st.title("Análisis de la Sequía 2020-2023 (Evento Niña)")
 st.markdown(
     """
     <div style="font-size: 17px; line-height: 1.6; color: #444; margin-bottom: 1.5rem;">
