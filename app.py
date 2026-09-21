@@ -5,6 +5,8 @@ from plotly.subplots import make_subplots
 import numpy as np
 import re
 import unicodedata
+import json
+import urllib.request
 import folium
 from streamlit_folium import st_folium
 
@@ -111,7 +113,7 @@ def color_sequia(valor):
         return '#999999'
 
 # ─────────────────────────────────────────────────────────────────────
-# CARGA DE DATOS
+# CARGA DE DATOS (CSV)
 # ─────────────────────────────────────────────────────────────────────
 @st.cache_data
 def load_data():
@@ -187,62 +189,54 @@ def load_data():
 df_med, df_max, df_eme, periodos_med, periodos_eme, periodos_todos = load_data()
 
 # ─────────────────────────────────────────────────────────────────────
-# CARGA DEL GEOPACKAGE (cacheada y simplificada para rendimiento)
+# CARGA DEL GEOJSON (sin geopandas)
 # ─────────────────────────────────────────────────────────────────────
 @st.cache_data
-def cargar_geopackage():
-    import geopandas as gpd
-    try:
-        gdf = gpd.read_file("Departamentos_area_estudio.gpkg")
-    except Exception:
-        url = "https://raw.githubusercontent.com/emiliano2026/sequia/main/Departamentos_area_estudio.gpkg"
-        gdf = gpd.read_file(url)
+def cargar_geojson():
+    """Carga el GeoJSON de departamentos desde el repositorio."""
+    url = "https://raw.githubusercontent.com/emiliano2026/sequia/main/Departamentos_area_estudio_v3.geojson"
+    with urllib.request.urlopen(url) as resp:
+        geojson_data = json.loads(resp.read().decode('utf-8'))
 
-    if gdf.crs is not None and gdf.crs.to_string() != 'EPSG:4326':
-        gdf = gdf.to_crs(epsg=4326)
+    # El GeoJSON tiene la propiedad 'DEPARTAMENTO' y 'PROVINCIA'
+    col_nombre = 'DEPARTAMENTO'
 
-    # Simplificar geometría para acelerar el render (0.005° ≈ 500m)
-    gdf['geometry'] = gdf.geometry.simplify(0.005, preserve_topology=True)
+    # Normalizar el nombre de cada departamento
+    for feat in geojson_data['features']:
+        nombre = feat['properties'].get(col_nombre, '')
+        feat['properties']['_dept_norm'] = normalizar_nombre(nombre)
 
-    # Detectar columna de nombre
-    col_nombre = None
-    for patron in ['departamento', 'nam', 'nombre', 'partido', 'dpto']:
-        for c in gdf.columns:
-            if normalizar_nombre(patron) in normalizar_nombre(c):
-                col_nombre = c
-                break
-        if col_nombre:
-            break
+    # Calcular centroide aproximado
+    lats, lons = [], []
+    for feat in geojson_data['features']:
+        coords = feat['geometry']['coordinates']
+        def recorrer(c):
+            if isinstance(c[0], (int, float)):
+                lons.append(c[0]); lats.append(c[1])
+            else:
+                for x in c: recorrer(x)
+        recorrer(coords)
+    centro = (np.mean(lats), np.mean(lons)) if lats else (-36.0, -60.0)
 
-    gdf['_dept_norm'] = gdf[col_nombre].apply(normalizar_nombre)
-
-    # Calcular centroide una sola vez
-    try:
-        centro = gdf.geometry.unary_union.centroid
-        centro_lat, centro_lon = centro.y, centro.x
-    except Exception:
-        centro_lat, centro_lon = -36.0, -60.0
-
-    return gdf, col_nombre, (centro_lat, centro_lon)
+    return geojson_data, col_nombre, centro
 
 try:
-    gdf_deptos, col_nombre_geo, centro_mapa = cargar_geopackage()
-    GEOPACKAGE_OK = True
+    geojson_deptos, col_nombre_geo, centro_mapa = cargar_geojson()
+    GEOJSON_OK = True
 except Exception as e:
-    st.sidebar.warning(f"⚠️ No se pudo cargar el GeoPackage: {e}")
-    gdf_deptos = None
+    st.sidebar.warning(f"⚠️ No se pudo cargar el GeoJSON: {e}")
+    geojson_deptos = None
     col_nombre_geo = None
     centro_mapa = (-36.0, -60.0)
-    GEOPACKAGE_OK = False
+    GEOJSON_OK = False
 
 # ─────────────────────────────────────────────────────────────────────
 # MAPA COROPLÉTICO INTERACTIVO
 # ─────────────────────────────────────────────────────────────────────
 st.subheader("🗺️ Distribución espacial de la sequía")
 
-if GEOPACKAGE_OK and gdf_deptos is not None and col_nombre_geo is not None:
+if GEOJSON_OK and geojson_deptos is not None:
 
-    # ── Selectores (a la izquierda) y mapa (a la derecha) ──────────
     col_sel, col_mapa = st.columns([1, 4])
 
     with col_sel:
@@ -265,7 +259,6 @@ if GEOPACKAGE_OK and gdf_deptos is not None and col_nombre_geo is not None:
 
         st.markdown("---")
         st.markdown("**Escala**")
-        # Leyenda vertical
         leyenda_items = ""
         for i in range(10):
             leyenda_items += (
@@ -292,18 +285,18 @@ if GEOPACKAGE_OK and gdf_deptos is not None and col_nombre_geo is not None:
         df_val = df_sel[['_dept_norm', periodo_mapa]].copy()
         df_val = df_val.rename(columns={periodo_mapa: 'valor'})
         df_val = df_val.dropna(subset=['valor']).drop_duplicates('_dept_norm')
+        valores_por_depto = dict(zip(df_val['_dept_norm'], df_val['valor']))
 
-        gdf_plot = gdf_deptos.merge(df_val, on='_dept_norm', how='left')
-
-        # Crear mapa
+        # Crear mapa con OpenStreetMap (sin marca de agua)
         m = folium.Map(
             location=list(centro_mapa),
             zoom_start=5,
-            tiles="CartoDB positron",
+            tiles="OpenStreetMap",
         )
 
         def estilo(feature):
-            valor = feature['properties'].get('valor')
+            norm = feature['properties'].get('_dept_norm', '')
+            valor = valores_por_depto.get(norm)
             return {
                 'fillColor': color_sequia(valor),
                 'color': 'black',
@@ -311,18 +304,13 @@ if GEOPACKAGE_OK and gdf_deptos is not None and col_nombre_geo is not None:
                 'fillOpacity': 0.85,
             }
 
-        # Preparar los datos de las features: necesitamos 'valor' en properties
-        geojson_data = gdf_plot.__geo_interface__
-        for feat, (_, row) in zip(geojson_data['features'], gdf_plot.iterrows()):
-            feat['properties']['valor'] = None if pd.isna(row['valor']) else float(row['valor'])
-
         folium.GeoJson(
-            geojson_data,
+            geojson_deptos,
             name='Sequía',
             style_function=estilo,
             tooltip=folium.GeoJsonTooltip(
-                fields=[col_nombre_geo, 'valor'],
-                aliases=['Departamento:', f'{estadistico_mapa} {periodo_mapa}:'],
+                fields=[col_nombre_geo],
+                aliases=['Departamento:'],
                 localize=True,
             ),
         ).add_to(m)
@@ -331,11 +319,11 @@ if GEOPACKAGE_OK and gdf_deptos is not None and col_nombre_geo is not None:
 
     st.caption(
         f"Valor {estadistico_mapa.lower()} de intensidad de sequía acumulada — {periodo_mapa}. "
-        "Pasá el mouse sobre cada departamento para ver su valor."
+        "Pasá el mouse sobre cada departamento para ver su nombre."
     )
 
 else:
-    st.info("ℹ️ Subí el archivo 'Departamentos_area_estudio.gpkg' al repositorio para ver el mapa.")
+    st.info("ℹ️ Subí el archivo 'Departamentos_area_estudio_v3.geojson' al repositorio para ver el mapa.")
 
 # ─────────────────────────────────────────────────────────────────────
 # SESSION STATE
@@ -620,8 +608,8 @@ with st.expander("🔧 Ver datos crudos (diagnóstico del cruce)"):
     st.write(f"**Períodos emergencia ({len(periodos_eme)}):**", periodos_eme)
     st.write(f"**Períodos totales ({len(periodos_todos)}):**", periodos_todos)
 
-    if GEOPACKAGE_OK and gdf_deptos is not None:
-        st.write("### GeoPackage")
+    if GEOJSON_OK and geojson_deptos is not None:
+        st.write("### GeoJSON")
         st.write("**Columna de nombre detectada:**", col_nombre_geo)
-        st.write("**Cantidad de features:**", len(gdf_deptos))
-        st.write("**CRS:**", gdf_deptos.crs)
+        st.write("**Cantidad de features:**", len(geojson_deptos['features']))
+        st.write("**Centro calculado:**", centro_mapa)
