@@ -324,13 +324,12 @@ if GEOJSON_OK and geojson_deptos is not None:
 
         # ARGENMAP gris (IGN - Instituto Geográfico Nacional de Argentina)
         folium.TileLayer(
-            tiles='https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/argenmap_gris@EPSG%3A900913@png/{z}/{x}/{y}.png',
-            attr='Instituto Geográfico Nacional — Argenmap gris',
-            name='Argenmap gris',
+            tiles='https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+            attr='© OpenStreetMap contributors © CARTO',
+            name='CartoDB Positron',
             overlay=False,
             control=True,
-            tms=True,
-            max_zoom=18,
+            max_zoom=19,
         ).add_to(m)
 
         def estilo(feature):
