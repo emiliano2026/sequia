@@ -655,4 +655,3 @@ with st.expander("🔧 Ver datos crudos (diagnóstico del cruce)"):
         st.write("**Columnas:**", list(gdf_deptos.columns))
         st.write("**Cantidad de features:**", len(gdf_deptos))
         st.write("**CRS:**", gdf_deptos.crs)
-
