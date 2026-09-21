@@ -54,6 +54,10 @@ def buscar_columna(df, patrones):
                 return cr
     return None
 
+def construir_key(provincia, departamento):
+    """Clave única compuesta: provincia|departamento (ambos normalizados)."""
+    return f"{normalizar_nombre(provincia)}|{normalizar_nombre(departamento)}"
+
 def match_departamento(depto_seq, deptos_eme_norm):
     d_seq_norm = normalizar_nombre(depto_seq)
     if not d_seq_norm:
@@ -137,7 +141,7 @@ def load_data():
             df[p] = pd.to_numeric(df[p], errors='coerce')
         return df, periodos
 
-    # Base de sequía MEDIANA
+    # ── Base de sequía MEDIANA ──────────────────────────────────────
     df_med, periodos_med = leer_base_sequia(URL_MED, '_median')
     col_prov_med = buscar_columna(df_med, ['provincia'])
     col_dept_med = buscar_columna(df_med, ['departamento', 'nam', 'partido', 'municipio'])
@@ -148,8 +152,11 @@ def load_data():
     df_med['DEPARTAMENTO'] = df_med[col_dept_med].astype(str).str.strip()
     df_med['_prov_norm']   = df_med['PROVINCIA'].apply(normalizar_nombre)
     df_med['_dept_norm']   = df_med['DEPARTAMENTO'].apply(normalizar_nombre)
+    df_med['_key']         = df_med.apply(
+        lambda r: construir_key(r['PROVINCIA'], r['DEPARTAMENTO']), axis=1
+    )
 
-    # Base de sequía MÁXIMO
+    # ── Base de sequía MÁXIMO ──────────────────────────────────────
     df_max, periodos_max = leer_base_sequia(URL_MAX, '_max')
     col_prov_max = buscar_columna(df_max, ['provincia'])
     col_dept_max = buscar_columna(df_max, ['departamento', 'nam', 'partido', 'municipio'])
@@ -160,8 +167,11 @@ def load_data():
     df_max['DEPARTAMENTO'] = df_max[col_dept_max].astype(str).str.strip()
     df_max['_prov_norm']   = df_max['PROVINCIA'].apply(normalizar_nombre)
     df_max['_dept_norm']   = df_max['DEPARTAMENTO'].apply(normalizar_nombre)
+    df_max['_key']         = df_max.apply(
+        lambda r: construir_key(r['PROVINCIA'], r['DEPARTAMENTO']), axis=1
+    )
 
-    # Base de emergencia
+    # ── Base de emergencia ──────────────────────────────────────────
     df_eme = pd.read_csv(URL_EME, sep=',', skipinitialspace=True,
                          dtype=str, encoding='utf-8-sig')
     df_eme.columns = df_eme.columns.str.strip()
@@ -178,6 +188,9 @@ def load_data():
     df_eme['ACTIVIDAD']    = df_eme[col_act_eme].astype(str).str.strip()
     df_eme['_prov_norm']   = df_eme['PROVINCIA'].apply(normalizar_nombre)
     df_eme['_dept_norm']   = df_eme['DEPARTAMENTO'].apply(normalizar_nombre)
+    df_eme['_key']         = df_eme.apply(
+        lambda r: construir_key(r['PROVINCIA'], r['DEPARTAMENTO']), axis=1
+    )
 
     periodos_todos = list(periodos_med)
     for p in periodos_eme:
@@ -199,10 +212,28 @@ def cargar_geojson():
 
     col_nombre = 'DEPARTAMENTO'
 
-    for feat in geojson_data['features']:
-        nombre = feat['properties'].get(col_nombre, '')
-        feat['properties']['_dept_norm'] = normalizar_nombre(nombre)
+    # Verificar si el GeoJSON tiene una columna de PROVINCIA
+    props_ejemplo = geojson_data['features'][0]['properties']
+    col_provincia_geo = None
+    for key in props_ejemplo.keys():
+        if 'provincia' in normalizar_nombre(key):
+            col_provincia_geo = key
+            break
 
+    # Construir _key en cada feature
+    for feat in geojson_data['features']:
+        props = feat['properties']
+        nombre = props.get(col_nombre, '')
+        if col_provincia_geo:
+            provincia = props.get(col_provincia_geo, '')
+            key = construir_key(provincia, nombre)
+        else:
+            # Fallback: asumimos Buenos Aires para el área de estudio
+            key = f"buenosaires|{normalizar_nombre(nombre)}"
+        props['_key'] = key
+        props['_dept_norm'] = normalizar_nombre(nombre)
+
+    # Centroide
     lats, lons = [], []
     for feat in geojson_data['features']:
         coords = feat['geometry']['coordinates']
@@ -214,25 +245,28 @@ def cargar_geojson():
         recorrer(coords)
     centro = (np.mean(lats), np.mean(lons)) if lats else (-36.0, -60.0)
 
-    return geojson_data, col_nombre, centro
+    return geojson_data, col_nombre, col_provincia_geo, centro
 
 try:
-    geojson_deptos, col_nombre_geo, centro_mapa = cargar_geojson()
+    geojson_deptos, col_nombre_geo, col_provincia_geo, centro_mapa = cargar_geojson()
     GEOJSON_OK = True
 except Exception as e:
     st.sidebar.warning(f"⚠️ No se pudo cargar el GeoJSON: {e}")
     geojson_deptos = None
     col_nombre_geo = None
+    col_provincia_geo = None
     centro_mapa = (-36.0, -60.0)
     GEOJSON_OK = False
 
 # ─────────────────────────────────────────────────────────────────────
-# SESSION STATE (se inicializa ANTES del mapa para que el clic lo actualice)
+# SESSION STATE
 # ─────────────────────────────────────────────────────────────────────
 if "prov_sel" not in st.session_state:
     st.session_state["prov_sel"] = None
 if "depto_sel" not in st.session_state:
     st.session_state["depto_sel"] = None
+if "key_sel" not in st.session_state:
+    st.session_state["key_sel"] = None
 
 # ─────────────────────────────────────────────────────────────────────
 # MAPA COROPLÉTICO INTERACTIVO
@@ -284,13 +318,13 @@ if GEOJSON_OK and geojson_deptos is not None:
 
     with col_mapa:
         df_sel = df_med if estadistico_mapa == "Mediana" else df_max
-        df_val = df_sel[['_dept_norm', periodo_mapa]].copy()
+        df_val = df_sel[['_key', periodo_mapa]].copy()
         df_val = df_val.rename(columns={periodo_mapa: 'valor'})
-        df_val = df_val.dropna(subset=['valor']).drop_duplicates('_dept_norm')
-        valores_por_depto = dict(zip(df_val['_dept_norm'], df_val['valor']))
+        df_val = df_val.dropna(subset=['valor']).drop_duplicates('_key')
+        valores_por_key = dict(zip(df_val['_key'], df_val['valor']))
 
-        # Determinar depto actualmente seleccionado (para resaltarlo)
-        depto_actual_norm = normalizar_nombre(st.session_state.get("depto_sel") or "")
+        # Clave del depto actualmente seleccionado (para resaltarlo)
+        key_actual = st.session_state.get("key_sel") or ""
 
         m = folium.Map(
             location=list(centro_mapa),
@@ -299,9 +333,9 @@ if GEOJSON_OK and geojson_deptos is not None:
         )
 
         def estilo(feature):
-            norm = feature['properties'].get('_dept_norm', '')
-            valor = valores_por_depto.get(norm)
-            es_sel = (norm == depto_actual_norm) and norm != ""
+            key = feature['properties'].get('_key', '')
+            valor = valores_por_key.get(key)
+            es_sel = (key == key_actual) and key != ""
             return {
                 'fillColor': color_sequia(valor),
                 'color': '#0000FF' if es_sel else 'black',
@@ -309,18 +343,25 @@ if GEOJSON_OK and geojson_deptos is not None:
                 'fillOpacity': 0.9 if es_sel else 0.85,
             }
 
+        # Tooltip: mostrar provincia + departamento
+        if col_provincia_geo:
+            campos_tooltip = [col_provincia_geo, col_nombre_geo]
+            alias_tooltip = ['Provincia:', 'Departamento:']
+        else:
+            campos_tooltip = [col_nombre_geo]
+            alias_tooltip = ['Departamento:']
+
         folium.GeoJson(
             geojson_deptos,
             name='Sequía',
             style_function=estilo,
             tooltip=folium.GeoJsonTooltip(
-                fields=[col_nombre_geo],
-                aliases=['Departamento:'],
+                fields=campos_tooltip,
+                aliases=alias_tooltip,
                 localize=True,
             ),
         ).add_to(m)
 
-        # ← AQUÍ ESTÁ LA CLAVE: returned_objects captura el clic
         map_data = st_folium(
             m,
             width=None,
@@ -332,19 +373,20 @@ if GEOJSON_OK and geojson_deptos is not None:
     # ── Procesar el clic del mapa ──────────────────────────────────
     if map_data and map_data.get("last_active_drawing"):
         props = map_data["last_active_drawing"]["properties"]
-        clicked_norm = props.get("_dept_norm", "")
+        clicked_key = props.get("_key", "")
 
-        if clicked_norm:
-            # Buscar el nombre real en df_med
-            match_row = df_med[df_med['_dept_norm'] == clicked_norm]
+        if clicked_key:
+            # Buscar la fila correspondiente en df_med por la clave compuesta
+            match_row = df_med[df_med['_key'] == clicked_key]
             if not match_row.empty:
                 nuevo_depto = match_row['DEPARTAMENTO'].iloc[0]
                 nueva_prov  = match_row['PROVINCIA'].iloc[0]
 
                 # Solo actualizar si cambió (evita reruns infinitos)
-                if st.session_state.get("depto_sel") != nuevo_depto:
-                    st.session_state["depto_sel"] = nuevo_depto
-                    st.session_state["prov_sel"] = nueva_prov
+                if st.session_state.get("key_sel") != clicked_key:
+                    st.session_state["key_sel"]    = clicked_key
+                    st.session_state["depto_sel"]  = nuevo_depto
+                    st.session_state["prov_sel"]   = nueva_prov
                     st.rerun()
 
     st.caption(
@@ -375,10 +417,16 @@ if st.session_state["depto_sel"] not in deptos:
 depto_sel = st.sidebar.selectbox("Departamento", deptos, key="depto_sel")
 depto_norm = normalizar_nombre(depto_sel)
 
-# Cruce robusto con emergencia
-mask_eme = (df_eme['_prov_norm'] == prov_norm) & (df_eme['_dept_norm'] == depto_norm)
+# Asegurar que la key_sel esté sincronizada con el filtro
+key_filtro = construir_key(prov_sel, depto_sel)
+if st.session_state.get("key_sel") != key_filtro:
+    st.session_state["key_sel"] = key_filtro
+
+# Cruce robusto con emergencia (usando _key)
+mask_eme = (df_eme['_key'] == key_filtro)
 df_eme_depto = df_eme[mask_eme]
 if df_eme_depto.empty:
+    # Fallback: match por departamento solo (caso raro)
     df_eme_depto = df_eme[df_eme['_dept_norm'] == depto_norm]
 if df_eme_depto.empty:
     deptos_eme_unicos = df_eme[['DEPARTAMENTO', '_dept_norm']].drop_duplicates()
@@ -402,7 +450,7 @@ act_sel = st.sidebar.multiselect(
 # ─────────────────────────────────────────────────────────────────────
 # DATOS DE SEQUÍA (MEDIANA Y MÁXIMO)
 # ─────────────────────────────────────────────────────────────────────
-fila_med = df_med_prov[df_med_prov['DEPARTAMENTO'] == depto_sel]
+fila_med = df_med[df_med['_key'] == key_filtro]
 if fila_med.empty:
     st.warning(f"⚠️ No hay datos de sequía (mediana) para {depto_sel} ({prov_sel}).")
     st.stop()
@@ -415,8 +463,7 @@ for p in periodos_todos:
     else:
         valores_med.append(np.nan)
 
-df_max_prov = df_max[df_max['_prov_norm'] == prov_norm]
-fila_max = df_max_prov[df_max_prov['DEPARTAMENTO'] == depto_sel]
+fila_max = df_max[df_max['_key'] == key_filtro]
 valores_max = []
 if fila_max.empty:
     valores_max = [np.nan] * len(periodos_todos)
@@ -611,6 +658,7 @@ with st.expander("🔧 Ver datos crudos (diagnóstico del cruce)"):
              sorted(df_med_prov['DEPARTAMENTO'].unique())[:30])
 
     st.write("### Base de sequía (máximo)")
+    df_max_prov = df_max[df_max['_prov_norm'] == prov_norm]
     st.write(f"**Departamentos de '{prov_sel}':**",
              sorted(df_max_prov['DEPARTAMENTO'].unique())[:30])
 
@@ -620,6 +668,7 @@ with st.expander("🔧 Ver datos crudos (diagnóstico del cruce)"):
              sorted(df_eme[df_eme['_prov_norm'] == prov_norm]['DEPARTAMENTO'].unique())[:30])
 
     st.write("### Cruce actual")
+    st.write(f"Clave seleccionada (`_key`): `{key_filtro}`")
     st.write(f"Departamento seleccionado: `{depto_sel}`")
     st.write(f"Filas en emergencia: **{len(df_eme_depto)}**")
     if len(df_eme_depto) > 0:
@@ -633,5 +682,10 @@ with st.expander("🔧 Ver datos crudos (diagnóstico del cruce)"):
     if GEOJSON_OK and geojson_deptos is not None:
         st.write("### GeoJSON")
         st.write("**Columna de nombre detectada:**", col_nombre_geo)
+        st.write("**Columna de provincia detectada:**", col_provincia_geo)
         st.write("**Cantidad de features:**", len(geojson_deptos['features']))
         st.write("**Centro calculado:**", centro_mapa)
+        st.write("**Ejemplo de `_key` en el GeoJSON:**",
+                 [f['properties'].get('_key') for f in geojson_deptos['features'][:5]])
+        st.write("**Ejemplo de `_key` en el DataFrame:**",
+                 list(df_med['_key'].dropna().unique()[:5]))
