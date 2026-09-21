@@ -276,8 +276,8 @@ if n_acts == 0:
         y=valores_max,
         mode='lines+markers',
         name='Máximo departamental',
-        line=dict(color='#d62728', width=2, dash='dot'),
-        marker=dict(size=7, color='#d62728', symbol='diamond'),
+        line=dict(color='#808080', width=2, dash='dot'),
+        marker=dict(size=7, color='#808080', symbol='diamond'),
         connectgaps=False,
     ))
     fig.add_hline(
