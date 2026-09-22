@@ -131,7 +131,6 @@ def matriz_confusion_depto(key, df_med, df_eme, periodos, periodos_eme,
                 break
         tiene_respuesta_mes.append(hay)
 
-    # Aplicar delay retroactivo
     tiene_respuesta = tiene_respuesta_mes.copy()
     if delay > 0:
         tiene_respuesta = [False] * len(periodos)
@@ -140,72 +139,104 @@ def matriz_confusion_depto(key, df_med, df_eme, periodos, periodos_eme,
                 for j in range(max(0, i - delay), i + 1):
                     tiene_respuesta[j] = True
 
-    TP = sum(1 for e, r in zip(tiene_evento, tiene_respuesta) if e and r)
+    VP = sum(1 for e, r in zip(tiene_evento, tiene_respuesta) if e and r)
     FN = sum(1 for e, r in zip(tiene_evento, tiene_respuesta) if e and not r)
     FP = sum(1 for e, r in zip(tiene_evento, tiene_respuesta) if not e and r)
-    TN = sum(1 for e, r in zip(tiene_evento, tiene_respuesta) if not e and not r)
+    VN = sum(1 for e, r in zip(tiene_evento, tiene_respuesta) if not e and not r)
 
     return {
         'key': key,
         'provincia': fila['PROVINCIA'].iloc[0],
         'departamento': fila['DEPARTAMENTO'].iloc[0],
-        'TP': TP, 'FN': FN, 'FP': FP, 'TN': TN,
-        'tiene_evento': tiene_evento,
-        'tiene_respuesta': tiene_respuesta,
-        'valores': valores,
+        'VP': VP, 'FN': FN, 'FP': FP, 'VN': VN,
     }
 
 
-def matriz_confusion_plotly(TP, FN, FP, TN, titulo="Matriz de confusión", height=380):
-    """Devuelve una figura Plotly con la matriz de confusión estilo semáforo."""
+def calcular_metricas(VP, FN, FP, VN):
+    """Calcula las métricas de desempeño a partir de la matriz de confusión."""
+    total = VP + FN + FP + VN
+    exactitud    = (VP + VN) / total if total > 0 else np.nan
+    precision    = VP / (VP + FP) if (VP + FP) > 0 else np.nan
+    sensibilidad = VP / (VP + FN) if (VP + FN) > 0 else np.nan
+    especificidad= VN / (VN + FP) if (VN + FP) > 0 else np.nan
+    return {
+        'EXACTITUD': exactitud,
+        'PRECISIÓN': precision,
+        'SENSIBILIDAD': sensibilidad,
+        'ESPECIFICIDAD': especificidad,
+    }
 
-    z_texto = [
-        [f"✅ TP<br><b>{TP}</b>", f"❌ FN<br><b>{FN}</b>"],
-        [f"⚠️ FP<br><b>{FP}</b>", f"· TN<br><b>{TN}</b>"],
-    ]
+
+def matriz_confusion_plotly(VP, FN, FP, VN, titulo="Matriz de confusión", height=380):
+    """Dibuja la matriz de confusión con paleta semáforo (shapes + annotations)."""
+    fig = go.Figure()
+
+    # Intensidad proporcional al valor máximo
+    max_val = max(VP, FN, FP, VN) or 1
+
+    def color_semaforo(base_rgb, valor):
+        """Mezcla el color base con blanco según el valor (55% - 100%)."""
+        intensidad = 0.55 + 0.45 * (valor / max_val)
+        r = int(255 * (1 - intensidad) + base_rgb[0] * intensidad)
+        g = int(255 * (1 - intensidad) + base_rgb[1] * intensidad)
+        b = int(255 * (1 - intensidad) + base_rgb[2] * intensidad)
+        return f"rgb({r},{g},{b})"
 
     # Colores base saturados
-    colores_base = {
-        (0, 0): np.array([38, 166, 64]) / 255.0,     # TP verde
-        (0, 1): np.array([200, 20, 20]) / 255.0,     # FN rojo
-        (1, 0): np.array([242, 140, 38]) / 255.0,    # FP naranja
-        (1, 1): np.array([140, 210, 140]) / 255.0,   # TN verde claro
-    }
+    color_VP = color_semaforo((20, 150, 60), VP)     # verde fuerte
+    color_FN = color_semaforo((200, 30, 30), FN)     # rojo fuerte
+    color_FP = color_semaforo((240, 140, 30), FP)    # naranja
+    color_VN = color_semaforo((140, 200, 140), VN)   # verde claro
 
-    valores = {(0, 0): TP, (0, 1): FN, (1, 0): FP, (1, 1): TN}
-    max_val = max(TP, FN, FP, TN) if max(TP, FN, FP, TN) > 0 else 1
+    # Definir celdas: (x0, x1, y0, y1, valor, etiqueta, color)
+    celdas = [
+        (-0.5, 0.5, -0.5, 0.5, VP, "Verdaderos Positivos<br>(VP)", color_VP),
+        ( 0.5, 1.5, -0.5, 0.5, FN, "Falsos Negativos<br>(FN)", color_FN),
+        (-0.5, 0.5,  0.5, 1.5, FP, "Falsos Positivos<br>(FP)", color_FP),
+        ( 0.5, 1.5,  0.5, 1.5, VN, "Verdaderos Negativos<br>(VN)", color_VN),
+    ]
 
-    # Construir la colorscale customizada (4 bloques)
-    colorscale = []
-    for k, (i, j) in enumerate([(0, 0), (0, 1), (1, 0), (1, 1)]):
-        base = colores_base[(i, j)]
-        intensidad = 0.55 + 0.45 * (valores[(i, j)] / max_val)
-        rgb = np.ones(3) * (1 - intensidad) + base * intensidad
-        color_str = f"rgb({int(rgb[0]*255)},{int(rgb[1]*255)},{int(rgb[2]*255)})"
-        colorscale.append([k * 0.25, color_str])
-        colorscale.append([(k + 1) * 0.25 - 0.001, color_str])
+    for x0, x1, y0, y1, valor, etiqueta, color in celdas:
+        # Rectángulo de fondo
+        fig.add_shape(
+            type="rect", x0=x0, x1=x1, y0=y0, y1=y1,
+            fillcolor=color,
+            line=dict(color='white', width=3),
+            layer='below',
+        )
+        # Etiqueta + valor
+        fig.add_annotation(
+            x=(x0 + x1) / 2, y=(y0 + y1) / 2,
+            text=f"{etiqueta}<br><b style='font-size:22px'>{valor}</b>",
+            showarrow=False,
+            font=dict(size=13, color='black'),
+            align='center',
+        )
 
-    fig = go.Figure(data=go.Heatmap(
-        z=[[0, 1], [2, 3]],
-        text=z_texto,
-        texttemplate="%{text}",
-        textfont={"size": 14, "family": "Arial"},
-        colorscale=colorscale,
-        showscale=False,
-        hoverinfo='skip',
-        x=['Hay respuesta', 'No hay respuesta'],
-        y=['Hay evento', 'No hay evento'],
-        xgap=4,
-        ygap=4,
-    ))
+    fig.update_xaxes(
+        tickvals=[0, 1],
+        ticktext=['Hay respuesta', 'No hay respuesta'],
+        range=[-0.5, 1.5],
+        side='top',
+        showgrid=False,
+        zeroline=False,
+        tickfont=dict(size=12),
+    )
+    fig.update_yaxes(
+        tickvals=[0, 1],
+        ticktext=['Hay evento', 'No hay evento'],
+        range=[1.5, -0.5],
+        showgrid=False,
+        zeroline=False,
+        tickfont=dict(size=12),
+    )
 
     fig.update_layout(
         title=dict(text=titulo, x=0.5, xanchor='center', font=dict(size=13)),
-        xaxis=dict(side='top', tickfont=dict(size=11)),
-        yaxis=dict(autorange='reversed', tickfont=dict(size=11)),
         height=height,
-        margin=dict(l=110, r=20, t=70, b=20),
+        margin=dict(l=120, r=20, t=70, b=30),
         plot_bgcolor='white',
+        showlegend=False,
     )
 
     return fig
@@ -300,7 +331,6 @@ def cargar_geojson():
         geojson_data = json.loads(resp.read().decode('utf-8'))
 
     col_nombre = 'DEPARTAMENTO'
-
     props_ejemplo = geojson_data['features'][0]['properties']
     col_provincia_geo = None
     for key in props_ejemplo.keys():
@@ -342,6 +372,43 @@ except Exception as e:
     col_provincia_geo = None
     centro_mapa = (-36.0, -60.0)
     GEOJSON_OK = False
+
+# ─────────────────────────────────────────────────────────────────────
+# CARGA DE MATRICES PRECALCULADAS (CSV en GitHub)
+# ─────────────────────────────────────────────────────────────────────
+URL_MC_DEPTO = "https://raw.githubusercontent.com/emiliano2026/sequia/main/matriz_confusion_depto.csv"
+URL_MC_PROV  = "https://raw.githubusercontent.com/emiliano2026/sequia/main/matriz_confusion_provincia.csv"
+
+@st.cache_data
+def cargar_matrices_precalculadas():
+    """Intenta cargar las matrices precalculadas desde GitHub. Retorna (None, None) si fallan."""
+    try:
+        df_depto = pd.read_csv(URL_MC_DEPTO, dtype={'key': str})
+        df_prov = pd.read_csv(URL_MC_PROV)
+        return df_depto, df_prov
+    except Exception:
+        return None, None
+
+df_mc_depto_precalc, df_mc_prov_precalc = cargar_matrices_precalculadas()
+
+def obtener_matriz_depto(key, provincia, departamento):
+    """Devuelve la matriz del departamento: usa precalculada si existe, si no calcula."""
+    if df_mc_depto_precalc is not None:
+        fila = df_mc_depto_precalc[df_mc_depto_precalc['key'] == key]
+        if not fila.empty:
+            return {
+                'key': key,
+                'provincia': fila['PROVINCIA'].iloc[0],
+                'departamento': fila['DEPARTAMENTO'].iloc[0],
+                'VP': int(fila['VP'].iloc[0]),
+                'FN': int(fila['FN'].iloc[0]),
+                'FP': int(fila['FP'].iloc[0]),
+                'VN': int(fila['VN'].iloc[0]),
+            }
+    # Fallback: calcular
+    return matriz_confusion_depto(key, df_med, df_eme, periodos_med, periodos_eme,
+                                   umbral=6, delay=1)
+
 
 # ─────────────────────────────────────────────────────────────────────
 # SINCRONIZACIÓN DE FILTROS
@@ -499,7 +566,6 @@ depto_norm = normalizar_nombre(depto_sel)
 
 key_filtro = construir_key(prov_sel, depto_sel)
 
-# Cruce robusto con emergencia
 df_eme_depto = df_eme[df_eme['_key'] == key_filtro]
 if df_eme_depto.empty:
     df_eme_depto = df_eme[df_eme['_dept_norm'] == depto_norm]
@@ -717,8 +783,7 @@ if filas:
 else:
     if not actividades:
         st.warning(
-            f"⚠️ No se encontraron actividades para **{depto_sel}** en la base de emergencia. "
-            "Revisá el expander **'🔧 Ver datos crudos'** para diagnosticar."
+            f"⚠️ No se encontraron actividades para **{depto_sel}** en la base de emergencia."
         )
     else:
         st.info("ℹ️ No hay resoluciones de emergencia para esta selección.")
@@ -727,26 +792,25 @@ else:
 # MATRIZ DE CONFUSIÓN DEL DEPARTAMENTO SELECCIONADO
 # ─────────────────────────────────────────────────────────────────────
 st.markdown("---")
-st.subheader("🎯 Evaluación del protocolo de sequía — Matriz de confusión")
+st.subheader("🎯 Evaluación de la respuesta estatal — Matriz de confusión")
 st.caption(
     "Compara los meses con evento de sequía (intensidad acumulada ≥ 6) contra los meses "
     "con resolución de emergencia declarada (mismo mes o hasta 1 mes después)."
 )
 
-resultado_mc_depto = matriz_confusion_depto(
-    key_filtro, df_med, df_eme, periodos_med, periodos_eme,
-    umbral=6, delay=1
-)
+resultado_mc_depto = obtener_matriz_depto(key_filtro, prov_sel, depto_sel)
 
 if resultado_mc_depto:
+    VP = resultado_mc_depto['VP']
+    FN = resultado_mc_depto['FN']
+    FP = resultado_mc_depto['FP']
+    VN = resultado_mc_depto['VN']
+
     col_mc, col_metricas = st.columns([1, 1])
 
     with col_mc:
         fig_mc = matriz_confusion_plotly(
-            resultado_mc_depto['TP'],
-            resultado_mc_depto['FN'],
-            resultado_mc_depto['FP'],
-            resultado_mc_depto['TN'],
+            VP, FN, FP, VN,
             titulo=f"{depto_sel} ({prov_sel})",
             height=380,
         )
@@ -754,53 +818,46 @@ if resultado_mc_depto:
 
     with col_metricas:
         st.markdown("**Métricas de desempeño**")
-        TP = resultado_mc_depto['TP']
-        FN = resultado_mc_depto['FN']
-        FP = resultado_mc_depto['FP']
-        TN = resultado_mc_depto['TN']
-
-        precision = TP / (TP + FP) if (TP + FP) > 0 else None
-        recall    = TP / (TP + FN) if (TP + FN) > 0 else None
-        exactitud = (TP + TN) / (TP + FN + FP + TN) if (TP + FN + FP + TN) > 0 else None
-        f1 = (2 * precision * recall / (precision + recall)
-              if precision and recall and (precision + recall) > 0 else None)
+        metricas = calcular_metricas(VP, FN, FP, VN)
 
         def fmt_pct(x):
-            return f"{x:.1%}" if x is not None else "—"
+            return f"{x:.1%}" if pd.notna(x) else "—"
 
-        st.metric("Precisión", fmt_pct(precision),
-                  help="Cuando hubo respuesta, ¿había sequía? = TP/(TP+FP)")
-        st.metric("Recall (Sensibilidad)", fmt_pct(recall),
-                  help="Cuando hubo sequía, ¿hubo respuesta? = TP/(TP+FN)")
-        st.metric("Exactitud", fmt_pct(exactitud),
-                  help="% de meses clasificados correctamente = (TP+TN)/Total")
-        st.metric("F1", f"{f1:.3f}" if f1 else "—",
-                  help="Balance entre precisión y recall")
+        st.metric("Exactitud (Accuracy)", fmt_pct(metricas['EXACTITUD']),
+                  help="(VP+VN) / Total — % de meses clasificados correctamente")
+        st.metric("Precisión (Precision)", fmt_pct(metricas['PRECISIÓN']),
+                  help="VP / (VP+FP) — cuando se declaró emergencia, ¿había sequía?")
+        st.metric("Sensibilidad / Exhaustividad (Recall)", fmt_pct(metricas['SENSIBILIDAD']),
+                  help="VP / (VP+FN) — cuando hubo sequía, ¿se declaró emergencia?")
+        st.metric("Especificidad (Specificity)", fmt_pct(metricas['ESPECIFICIDAD']),
+                  help="VN / (VN+FP) — cuando NO hubo sequía, ¿NO se declaró emergencia?")
 
     with st.expander("ℹ️ ¿Cómo interpretar esta matriz?"):
+        total = VP + FN + FP + VN
         st.markdown(f"""
         **Departamento analizado:** {depto_sel} ({prov_sel})  
         **Umbral de sequía:** 6 (valor acumulado trimestral)  
         **Ventana de respuesta:** mismo mes o hasta 1 mes después  
-        **Total de meses evaluados:** {TP + FN + FP + TN}
+        **Total de meses evaluados:** {total}
 
         | Categoría | Significado | Meses |
         |-----------|-------------|-------|
-        | ✅ **TP** (Aciertos) | Hubo evento de sequía Y resolución | {TP} |
-        | ❌ **FN** (Omisiones) | Hubo sequía pero NO se declaró emergencia | {FN} |
-        | ⚠️ **FP** (Comisiones) | Se declaró emergencia sin evento de sequía | {FP} |
-        | · **TN** (Sin nada) | Ni evento ni resolución | {TN} |
+        | ✅ **VP** (Verdaderos Positivos) | Hubo evento de sequía Y resolución | {VP} |
+        | ❌ **FN** (Falsos Negativos) | Hubo sequía pero NO se declaró emergencia | {FN} |
+        | ⚠️ **FP** (Falsos Positivos) | Se declaró emergencia sin evento de sequía | {FP} |
+        | · **VN** (Verdaderos Negativos) | Ni evento ni resolución | {VN} |
 
         **Métricas:**
-        - **Precisión** = TP / (TP + FP): cuando el Estado respondió, ¿acertó?
-        - **Recall** = TP / (TP + FN): cuando hubo sequía, ¿el Estado respondió?
-        - **F1**: promedio armónico entre ambas. Cercano a 1 = buen desempeño.
+        - **Exactitud** = (VP+VN) / Total: % de meses correctamente clasificados.
+        - **Precisión** = VP / (VP+FP): cuando el Estado respondió, ¿acertó?
+        - **Sensibilidad** = VP / (VP+FN): cuando hubo sequía, ¿el Estado respondió?
+        - **Especificidad** = VN / (VN+FP): cuando no hubo sequía, ¿el Estado se abstuvo?
         """)
 else:
     st.info("ℹ️ No hay datos suficientes para calcular la matriz en este departamento.")
 
 # ─────────────────────────────────────────────────────────────────────
-# ANÁLISIS GLOBAL POR PROVINCIA (expander)
+# ANÁLISIS GLOBAL POR PROVINCIA
 # ─────────────────────────────────────────────────────────────────────
 with st.expander("📊 Análisis global por provincia (clic para abrir)", expanded=False):
     st.markdown(
@@ -811,39 +868,43 @@ with st.expander("📊 Análisis global por provincia (clic para abrir)", expand
     @st.cache_data
     def calcular_matrices_provincias(_df_med, _df_eme, _periodos_med, _periodos_eme,
                                       umbral=6, delay=1):
-        resultados = []
-        for key in _df_med['_key'].unique():
-            r = matriz_confusion_depto(key, _df_med, _df_eme,
-                                       _periodos_med, _periodos_eme,
-                                       umbral=umbral, delay=delay)
-            if r:
-                resultados.append(r)
-
-        df = pd.DataFrame([{
-            'PROVINCIA': r['provincia'],
-            'DEPARTAMENTO': r['departamento'],
-            'TP': r['TP'], 'FN': r['FN'], 'FP': r['FP'], 'TN': r['TN'],
-        } for r in resultados])
+        """Calcula las matrices por provincia. Usa precalculadas si están disponibles."""
+        if df_mc_depto_precalc is not None:
+            df = df_mc_depto_precalc.copy()
+        else:
+            resultados = []
+            for key in _df_med['_key'].unique():
+                r = matriz_confusion_depto(key, _df_med, _df_eme,
+                                           _periodos_med, _periodos_eme,
+                                           umbral=umbral, delay=delay)
+                if r:
+                    resultados.append(r)
+            df = pd.DataFrame([{
+                'key': r['key'],
+                'PROVINCIA': r['provincia'],
+                'DEPARTAMENTO': r['departamento'],
+                'VP': r['VP'], 'FN': r['FN'], 'FP': r['FP'], 'VN': r['VN'],
+            } for r in resultados])
 
         df_prov = df.groupby('PROVINCIA').agg(
             N_DEPARTAMENTOS=('DEPARTAMENTO', 'nunique'),
-            TP=('TP', 'sum'), FN=('FN', 'sum'),
-            FP=('FP', 'sum'), TN=('TN', 'sum'),
+            VP=('VP', 'sum'), FN=('FN', 'sum'),
+            FP=('FP', 'sum'), VN=('VN', 'sum'),
         ).reset_index()
 
+        # Calcular métricas por provincia
         def calc(r):
-            TP, FN, FP, TN = r['TP'], r['FN'], r['FP'], r['TN']
-            precision = TP / (TP + FP) if (TP + FP) > 0 else np.nan
-            recall    = TP / (TP + FN) if (TP + FN) > 0 else np.nan
-            exactitud = (TP + TN) / (TP + FN + FP + TN) if (TP + FN + FP + TN) > 0 else np.nan
-            f1 = (2 * precision * recall / (precision + recall)
-                  if pd.notna(precision) and pd.notna(recall) and (precision + recall) > 0
-                  else np.nan)
-            return pd.Series({'PRECISIÓN': precision, 'RECALL': recall,
-                              'EXACTITUD': exactitud, 'F1': f1})
+            m = calcular_metricas(r['VP'], r['FN'], r['FP'], r['VN'])
+            return pd.Series({
+                'EXACTITUD': m['EXACTITUD'],
+                'PRECISIÓN': m['PRECISIÓN'],
+                'SENSIBILIDAD': m['SENSIBILIDAD'],
+                'ESPECIFICIDAD': m['ESPECIFICIDAD'],
+            })
 
         df_prov = pd.concat([df_prov, df_prov.apply(calc, axis=1)], axis=1)
-        df_prov = df_prov.sort_values('F1', ascending=False, na_position='last').reset_index(drop=True)
+        df_prov = df_prov.sort_values('SENSIBILIDAD', ascending=False,
+                                      na_position='last').reset_index(drop=True)
         return df_prov
 
     df_prov = calcular_matrices_provincias(
@@ -853,9 +914,8 @@ with st.expander("📊 Análisis global por provincia (clic para abrir)", expand
     # ─── Tabla resumen ─────────────────────────────────────────────
     st.markdown("### Resumen por provincia")
     df_show = df_prov.copy()
-    for col in ['PRECISIÓN', 'RECALL', 'EXACTITUD']:
+    for col in ['EXACTITUD', 'PRECISIÓN', 'SENSIBILIDAD', 'ESPECIFICIDAD']:
         df_show[col] = df_show[col].apply(lambda x: f"{x:.1%}" if pd.notna(x) else "—")
-    df_show['F1'] = df_show['F1'].apply(lambda x: f"{x:.3f}" if pd.notna(x) else "—")
     st.dataframe(df_show, use_container_width=True, hide_index=True)
 
     # ─── Grilla de matrices por provincia ──────────────────────────
@@ -872,7 +932,8 @@ with st.expander("📊 Análisis global por provincia (clic para abrir)", expand
                 row = df_prov.iloc[idx]
                 with cols[c]:
                     fig_p = matriz_confusion_plotly(
-                        row['TP'], row['FN'], row['FP'], row['TN'],
+                        int(row['VP']), int(row['FN']),
+                        int(row['FP']), int(row['VN']),
                         titulo=f"{row['PROVINCIA']}  (n={row['N_DEPARTAMENTOS']})",
                         height=340,
                     )
@@ -880,15 +941,15 @@ with st.expander("📊 Análisis global por provincia (clic para abrir)", expand
 
     # ─── Matriz global ─────────────────────────────────────────────
     st.markdown("### Matriz global (todas las provincias)")
-    TP_g = int(df_prov['TP'].sum())
+    VP_g = int(df_prov['VP'].sum())
     FN_g = int(df_prov['FN'].sum())
     FP_g = int(df_prov['FP'].sum())
-    TN_g = int(df_prov['TN'].sum())
+    VN_g = int(df_prov['VN'].sum())
 
     col_g1, col_g2 = st.columns([1, 1])
     with col_g1:
         fig_global = matriz_confusion_plotly(
-            TP_g, FN_g, FP_g, TN_g,
+            VP_g, FN_g, FP_g, VN_g,
             titulo="Matriz global — todas las provincias",
             height=380,
         )
@@ -896,14 +957,10 @@ with st.expander("📊 Análisis global por provincia (clic para abrir)", expand
 
     with col_g2:
         st.markdown("**Métricas globales**")
-        precision_g = TP_g / (TP_g + FP_g) if (TP_g + FP_g) > 0 else None
-        recall_g    = TP_g / (TP_g + FN_g) if (TP_g + FN_g) > 0 else None
-        exactitud_g = (TP_g + TN_g) / (TP_g + FN_g + FP_g + TN_g) if (TP_g + FN_g + FP_g + TN_g) > 0 else None
-        f1_g = (2 * precision_g * recall_g / (precision_g + recall_g)
-                if precision_g and recall_g and (precision_g + recall_g) > 0 else None)
-
+        m_g = calcular_metricas(VP_g, FN_g, FP_g, VN_g)
         st.metric("Total departamentos", df_prov['N_DEPARTAMENTOS'].sum())
-        st.metric("Precisión global", f"{precision_g:.1%}" if precision_g else "—")
-        st.metric("Recall global", f"{recall_g:.1%}" if recall_g else "—")
-        st.metric("F1 global", f"{f1_g:.3f}" if f1_g else "—")
+        st.metric("Exactitud", f"{m_g['EXACTITUD']:.1%}" if pd.notna(m_g['EXACTITUD']) else "—")
+        st.metric("Precisión", f"{m_g['PRECISIÓN']:.1%}" if pd.notna(m_g['PRECISIÓN']) else "—")
+        st.metric("Sensibilidad", f"{m_g['SENSIBILIDAD']:.1%}" if pd.notna(m_g['SENSIBILIDAD']) else "—")
+        st.metric("Especificidad", f"{m_g['ESPECIFICIDAD']:.1%}" if pd.notna(m_g['ESPECIFICIDAD']) else "—")
 
