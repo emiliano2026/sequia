@@ -321,15 +321,11 @@ if GEOJSON_OK and geojson_deptos is not None:
             zoom_start=5,
             tiles=None,
         )
-
-        # ARGENMAP gris (IGN - Instituto Geográfico Nacional de Argentina)
         folium.TileLayer(
-            tiles='https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-            attr='© OpenStreetMap contributors © CARTO',
-            name='CartoDB Positron',
+            tiles='OpenStreetMap',
+            name='OpenStreetMap',
             overlay=False,
             control=True,
-            max_zoom=19,
         ).add_to(m)
 
         def estilo(feature):
