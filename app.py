@@ -238,7 +238,7 @@ def matriz_confusion_plotly(VP, FN, FP, VN, titulo="Matriz de confusión", heigh
     Dibuja la matriz de confusión con:
       - Modo combinado: valor absoluto + porcentaje sobre el total
       - Paleta semáforo pastel (verde=bueno, rojo=malo, naranja=alerta)
-      - Textos con quiebre de línea y tamaños balanceados
+      - Textos con quiebre de línea y espaciado entre etiqueta y número
     """
     fig = go.Figure()
 
@@ -261,7 +261,6 @@ def matriz_confusion_plotly(VP, FN, FP, VN, titulo="Matriz de confusión", heigh
     color_VN = color_semaforo((140, 200, 140), VN)   # verde claro
 
     # Definir celdas: (x0, x1, y0, y1, valor, etiqueta, color)
-    # Etiquetas con <br> para que queden en dos líneas
     celdas = [
         (-0.5, 0.5, -0.5, 0.5, VP, "Verdaderos<br>Positivos", color_VP),
         ( 0.5, 1.5, -0.5, 0.5, FN, "Falsos<br>Negativos", color_FN),
@@ -277,11 +276,13 @@ def matriz_confusion_plotly(VP, FN, FP, VN, titulo="Matriz de confusión", heigh
             layer='below',
         )
         pct = valor / total * 100
-        # Texto: etiqueta · valor · porcentaje (tamaños balanceados)
+        # Texto: etiqueta · espacio · valor · espacio · porcentaje
         texto = (
             f"<span style='font-size:13px'>{etiqueta}</span>"
-            f"<br><span style='font-size:22px'>{valor}</span>"
-            f"<br><span style='font-size:12px'>({pct:.1f}%)</span>"
+            f"<br><br>"
+            f"<span style='font-size:24px'>{valor}</span>"
+            f"<br><br>"
+            f"<span style='font-size:15px'>({pct:.1f}%)</span>"
         )
         fig.add_annotation(
             x=(x0 + x1) / 2, y=(y0 + y1) / 2,
