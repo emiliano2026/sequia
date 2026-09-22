@@ -107,12 +107,12 @@ def color_sequia(valor):
         return '#999999'
 
 # ─────────────────────────────────────────────────────────────────────
-# MATRIZ DE CONFUSIÓN — FUNCIONES
+# MATRIZ DE CONFUSIÓN — CÁLCULO
 # ─────────────────────────────────────────────────────────────────────
-def matriz_confusion_depto(key, df_med, df_eme, periodos, periodos_eme,
+def matriz_confusion_depto(key, df_seq, df_eme, periodos, periodos_eme,
                            umbral=6, delay=1):
     """Calcula la matriz de confusión mes a mes para un departamento."""
-    fila = df_med[df_med['_key'] == key]
+    fila = df_seq[df_seq['_key'] == key]
     if fila.empty:
         return None
 
@@ -155,36 +155,108 @@ def matriz_confusion_depto(key, df_med, df_eme, periodos, periodos_eme,
 def calcular_metricas(VP, FN, FP, VN):
     """Calcula las métricas de desempeño a partir de la matriz de confusión."""
     total = VP + FN + FP + VN
-    exactitud    = (VP + VN) / total if total > 0 else np.nan
-    precision    = VP / (VP + FP) if (VP + FP) > 0 else np.nan
-    sensibilidad = VP / (VP + FN) if (VP + FN) > 0 else np.nan
-    especificidad= VN / (VN + FP) if (VN + FP) > 0 else np.nan
     return {
-        'EXACTITUD': exactitud,
-        'PRECISIÓN': precision,
-        'SENSIBILIDAD': sensibilidad,
-        'ESPECIFICIDAD': especificidad,
+        'EXACTITUD':     (VP + VN) / total if total > 0 else np.nan,
+        'PRECISIÓN':     VP / (VP + FP) if (VP + FP) > 0 else np.nan,
+        'SENSIBILIDAD':  VP / (VP + FN) if (VP + FN) > 0 else np.nan,
+        'ESPECIFICIDAD': VN / (VN + FP) if (VN + FP) > 0 else np.nan,
     }
 
 
-def matriz_confusion_plotly(VP, FN, FP, VN, titulo="Matriz de confusión", height=380):
-    """Dibuja la matriz de confusión con paleta semáforo (shapes + annotations)."""
+def calcular_tiempo_respuesta(key, df_seq, df_eme, periodos, periodos_eme,
+                              umbral=6, ventana_max=6):
+    """
+    Calcula el tiempo de respuesta (en meses) entre el inicio de cada evento
+    de sequía y la primera resolución declarada (cualquier actividad).
+
+    Returns:
+        dict con:
+            - tiempos: lista de delays por evento respondido
+            - promedio: promedio de los delays (o None)
+            - minimo: mínimo (o None)
+            - maximo: máximo (o None)
+            - eventos_totales: cantidad total de eventos detectados
+            - eventos_respondidos: cantidad de eventos con respuesta dentro de la ventana
+    """
+    fila = df_seq[df_seq['_key'] == key]
+    if fila.empty:
+        return None
+
+    valores = [fila[p].iloc[0] if p in periodos else np.nan for p in periodos]
+    df_eme_key = df_eme[df_eme['_key'] == key]
+
+    # Detectar eventos como rachas de valores >= umbral
+    eventos = []
+    en_evento = False
+    inicio = None
+    for i, v in enumerate(valores):
+        cumple = pd.notna(v) and v >= umbral
+        if cumple and not en_evento:
+            en_evento = True
+            inicio = i
+        elif not cumple and en_evento:
+            en_evento = False
+            eventos.append({'inicio': inicio, 'fin': i - 1})
+    if en_evento:
+        eventos.append({'inicio': inicio, 'fin': len(valores) - 1})
+
+    # ¿En qué meses hay alguna resolución (cualquier actividad)?
+    meses_con_respuesta = set()
+    for _, row in df_eme_key.iterrows():
+        for i, p in enumerate(periodos):
+            if p in periodos_eme:
+                val = str(row[p]).strip()
+                if val and val.lower() not in ('nan', 'none', '', 'null'):
+                    meses_con_respuesta.add(i)
+
+    # Para cada evento, buscar la primera resolución dentro de la ventana
+    tiempos = []
+    for ev in eventos:
+        i0 = ev['inicio']
+        i1 = min(ev['fin'] + ventana_max, len(periodos) - 1)
+        # Buscar el primer mes con respuesta en [i0, i1]
+        for i in range(i0, i1 + 1):
+            if i in meses_con_respuesta:
+                tiempos.append(i - i0)
+                break
+
+    return {
+        'tiempos': tiempos,
+        'promedio': float(np.mean(tiempos)) if tiempos else None,
+        'minimo': int(np.min(tiempos)) if tiempos else None,
+        'maximo': int(np.max(tiempos)) if tiempos else None,
+        'eventos_totales': len(eventos),
+        'eventos_respondidos': len(tiempos),
+    }
+
+
+# ─────────────────────────────────────────────────────────────────────
+# MATRIZ DE CONFUSIÓN — VISUALIZACIÓN (modo combinado, fuentes grandes)
+# ─────────────────────────────────────────────────────────────────────
+def matriz_confusion_plotly(VP, FN, FP, VN, titulo="Matriz de confusión", height=460):
+    """
+    Dibuja la matriz de confusión con:
+      - Modo combinado: valor absoluto + porcentaje sobre el total
+      - Paleta semáforo pastel (verde=bueno, rojo=malo, naranja=alerta)
+      - Fuentes grandes
+    """
     fig = go.Figure()
 
-    # Intensidad proporcional al valor máximo
+    total = VP + FN + FP + VN
+    if total == 0:
+        total = 1
     max_val = max(VP, FN, FP, VN) or 1
 
     def color_semaforo(base_rgb, valor):
-        """Mezcla el color base con blanco según el valor (55% - 100%)."""
-        intensidad = 0.55 + 0.45 * (valor / max_val)
+        """Mezcla el color base con blanco (60% - 100% de saturación)."""
+        intensidad = 0.6 + 0.4 * (valor / max_val)
         r = int(255 * (1 - intensidad) + base_rgb[0] * intensidad)
         g = int(255 * (1 - intensidad) + base_rgb[1] * intensidad)
         b = int(255 * (1 - intensidad) + base_rgb[2] * intensidad)
         return f"rgb({r},{g},{b})"
 
-    # Colores base saturados
-    color_VP = color_semaforo((20, 150, 60), VP)     # verde fuerte
-    color_FN = color_semaforo((200, 30, 30), FN)     # rojo fuerte
+    color_VP = color_semaforo((20, 150, 60), VP)     # verde
+    color_FN = color_semaforo((200, 30, 30), FN)     # rojo
     color_FP = color_semaforo((240, 140, 30), FP)    # naranja
     color_VN = color_semaforo((140, 200, 140), VN)   # verde claro
 
@@ -197,19 +269,24 @@ def matriz_confusion_plotly(VP, FN, FP, VN, titulo="Matriz de confusión", heigh
     ]
 
     for x0, x1, y0, y1, valor, etiqueta, color in celdas:
-        # Rectángulo de fondo
         fig.add_shape(
             type="rect", x0=x0, x1=x1, y0=y0, y1=y1,
             fillcolor=color,
-            line=dict(color='white', width=3),
+            line=dict(color='white', width=4),
             layer='below',
         )
-        # Etiqueta + valor
+        pct = valor / total * 100
+        # Texto: etiqueta arriba, valor grande, porcentaje abajo
+        texto = (
+            f"<span style='font-size:16px'>{etiqueta}</span>"
+            f"<br><b style='font-size:34px'>{valor}</b>"
+            f"<br><span style='font-size:16px'>({pct:.1f}%)</span>"
+        )
         fig.add_annotation(
             x=(x0 + x1) / 2, y=(y0 + y1) / 2,
-            text=f"{etiqueta}<br><b style='font-size:22px'>{valor}</b>",
+            text=texto,
             showarrow=False,
-            font=dict(size=13, color='black'),
+            font=dict(size=16, color='black'),
             align='center',
         )
 
@@ -220,7 +297,7 @@ def matriz_confusion_plotly(VP, FN, FP, VN, titulo="Matriz de confusión", heigh
         side='top',
         showgrid=False,
         zeroline=False,
-        tickfont=dict(size=12),
+        tickfont=dict(size=15),
     )
     fig.update_yaxes(
         tickvals=[0, 1],
@@ -228,13 +305,14 @@ def matriz_confusion_plotly(VP, FN, FP, VN, titulo="Matriz de confusión", heigh
         range=[1.5, -0.5],
         showgrid=False,
         zeroline=False,
-        tickfont=dict(size=12),
+        tickfont=dict(size=15),
     )
 
     fig.update_layout(
-        title=dict(text=titulo, x=0.5, xanchor='center', font=dict(size=13)),
+        title=dict(text=titulo, x=0.5, xanchor='center',
+                   font=dict(size=18)),
         height=height,
-        margin=dict(l=120, r=20, t=70, b=30),
+        margin=dict(l=140, r=30, t=90, b=30),
         plot_bgcolor='white',
         showlegend=False,
     )
@@ -376,39 +454,51 @@ except Exception as e:
 # ─────────────────────────────────────────────────────────────────────
 # CARGA DE MATRICES PRECALCULADAS (CSV en GitHub)
 # ─────────────────────────────────────────────────────────────────────
-URL_MC_DEPTO = "https://raw.githubusercontent.com/emiliano2026/sequia/main/matriz_confusion_depto.csv"
-URL_MC_PROV  = "https://raw.githubusercontent.com/emiliano2026/sequia/main/matriz_confusion_provincia.csv"
+URL_MC_DEPTO_MED = "https://raw.githubusercontent.com/emiliano2026/sequia/main/matriz_confusion_depto.csv"
+URL_MC_PROV_MED  = "https://raw.githubusercontent.com/emiliano2026/sequia/main/matriz_confusion_provincia.csv"
+URL_MC_DEPTO_MAX = "https://raw.githubusercontent.com/emiliano2026/sequia/main/matriz_confusion_depto_max.csv"
+URL_MC_PROV_MAX  = "https://raw.githubusercontent.com/emiliano2026/sequia/main/matriz_confusion_provincia_max.csv"
 
 @st.cache_data
 def cargar_matrices_precalculadas():
-    """Intenta cargar las matrices precalculadas desde GitHub. Retorna (None, None) si fallan."""
-    try:
-        df_depto = pd.read_csv(URL_MC_DEPTO, dtype={'key': str})
-        df_prov = pd.read_csv(URL_MC_PROV)
-        return df_depto, df_prov
-    except Exception:
-        return None, None
+    """Carga las matrices precalculadas. Devuelve None si algún CSV no existe."""
+    def safe_read(url, dtype=None):
+        try:
+            return pd.read_csv(url, dtype=dtype)
+        except Exception:
+            return None
+    return (
+        safe_read(URL_MC_DEPTO_MED, dtype={'key': str}),
+        safe_read(URL_MC_PROV_MED),
+        safe_read(URL_MC_DEPTO_MAX, dtype={'key': str}),
+        safe_read(URL_MC_PROV_MAX),
+    )
 
-df_mc_depto_precalc, df_mc_prov_precalc = cargar_matrices_precalculadas()
+df_mc_depto_med, df_mc_prov_med, df_mc_depto_max, df_mc_prov_max = cargar_matrices_precalculadas()
 
-def obtener_matriz_depto(key, provincia, departamento):
-    """Devuelve la matriz del departamento: usa precalculada si existe, si no calcula."""
-    if df_mc_depto_precalc is not None:
-        fila = df_mc_depto_precalc[df_mc_depto_precalc['key'] == key]
-        if not fila.empty:
-            return {
-                'key': key,
-                'provincia': fila['PROVINCIA'].iloc[0],
-                'departamento': fila['DEPARTAMENTO'].iloc[0],
-                'VP': int(fila['VP'].iloc[0]),
-                'FN': int(fila['FN'].iloc[0]),
-                'FP': int(fila['FP'].iloc[0]),
-                'VN': int(fila['VN'].iloc[0]),
-            }
-    # Fallback: calcular
-    return matriz_confusion_depto(key, df_med, df_eme, periodos_med, periodos_eme,
+def obtener_matriz_depto(key, estadistico="Mediana"):
+    """Devuelve la matriz del departamento desde el CSV correspondiente o la calcula."""
+    if estadistico == "Mediana" and df_mc_depto_med is not None:
+        fila = df_mc_depto_med[df_mc_depto_med['key'] == key]
+    elif estadistico == "Máximo" and df_mc_depto_max is not None:
+        fila = df_mc_depto_max[df_mc_depto_max['key'] == key]
+    else:
+        fila = pd.DataFrame()
+
+    if not fila.empty:
+        return {
+            'key': key,
+            'provincia': fila['PROVINCIA'].iloc[0],
+            'departamento': fila['DEPARTAMENTO'].iloc[0],
+            'VP': int(fila['VP'].iloc[0]),
+            'FN': int(fila['FN'].iloc[0]),
+            'FP': int(fila['FP'].iloc[0]),
+            'VN': int(fila['VN'].iloc[0]),
+        }
+    # Fallback: calcular al vuelo
+    df_src = df_med if estadistico == "Mediana" else df_max
+    return matriz_confusion_depto(key, df_src, df_eme, periodos_med, periodos_eme,
                                    umbral=6, delay=1)
-
 
 # ─────────────────────────────────────────────────────────────────────
 # SINCRONIZACIÓN DE FILTROS
@@ -798,7 +888,15 @@ st.caption(
     "con resolución de emergencia declarada (mismo mes o hasta 1 mes después)."
 )
 
-resultado_mc_depto = obtener_matriz_depto(key_filtro, prov_sel, depto_sel)
+# Selector del estadístico para la matriz
+estadistico_mc = st.radio(
+    "Estadístico para la matriz:",
+    ["Mediana", "Máximo"],
+    horizontal=True,
+    key="estadistico_mc",
+)
+
+resultado_mc_depto = obtener_matriz_depto(key_filtro, estadistico_mc)
 
 if resultado_mc_depto:
     VP = resultado_mc_depto['VP']
@@ -806,36 +904,80 @@ if resultado_mc_depto:
     FP = resultado_mc_depto['FP']
     VN = resultado_mc_depto['VN']
 
-    col_mc, col_metricas = st.columns([1, 1])
+    col_mc, col_metricas = st.columns([1.3, 1])
 
     with col_mc:
         fig_mc = matriz_confusion_plotly(
             VP, FN, FP, VN,
-            titulo=f"{depto_sel} ({prov_sel})",
-            height=380,
+            titulo=f"{depto_sel} ({prov_sel}) — {estadistico_mc}",
+            height=460,
         )
         st.plotly_chart(fig_mc, use_container_width=True)
 
     with col_metricas:
-        st.markdown("**Métricas de desempeño**")
         metricas = calcular_metricas(VP, FN, FP, VN)
 
         def fmt_pct(x):
             return f"{x:.1%}" if pd.notna(x) else "—"
 
+        st.markdown("**Métricas de desempeño**")
         st.metric("Exactitud (Accuracy)", fmt_pct(metricas['EXACTITUD']),
                   help="(VP+VN) / Total — % de meses clasificados correctamente")
         st.metric("Precisión (Precision)", fmt_pct(metricas['PRECISIÓN']),
                   help="VP / (VP+FP) — cuando se declaró emergencia, ¿había sequía?")
-        st.metric("Sensibilidad / Exhaustividad (Recall)", fmt_pct(metricas['SENSIBILIDAD']),
+        st.metric("Sensibilidad (Recall)", fmt_pct(metricas['SENSIBILIDAD']),
                   help="VP / (VP+FN) — cuando hubo sequía, ¿se declaró emergencia?")
         st.metric("Especificidad (Specificity)", fmt_pct(metricas['ESPECIFICIDAD']),
                   help="VN / (VN+FP) — cuando NO hubo sequía, ¿NO se declaró emergencia?")
+
+    # ─── TIEMPO DE RESPUESTA ───────────────────────────────────────
+    st.markdown("---")
+    st.markdown("#### ⏱️ Tiempo de respuesta del Estado")
+
+    df_src = df_med if estadistico_mc == "Mediana" else df_max
+    tiempo = calcular_tiempo_respuesta(
+        key_filtro, df_src, df_eme, periodos_med, periodos_eme,
+        umbral=6, ventana_max=6
+    )
+
+    if tiempo and tiempo['eventos_totales'] > 0:
+        col_t1, col_t2, col_t3, col_t4 = st.columns(4)
+        with col_t1:
+            if tiempo['promedio'] is not None:
+                st.metric("Tiempo medio", f"{tiempo['promedio']:.1f} meses")
+            else:
+                st.metric("Tiempo medio", "—")
+        with col_t2:
+            if tiempo['minimo'] is not None:
+                st.metric("Tiempo mínimo", f"{tiempo['minimo']} meses")
+            else:
+                st.metric("Tiempo mínimo", "—")
+        with col_t3:
+            if tiempo['maximo'] is not None:
+                st.metric("Tiempo máximo", f"{tiempo['maximo']} meses")
+            else:
+                st.metric("Tiempo máximo", "—")
+        with col_t4:
+            st.metric("Eventos respondidos",
+                      f"{tiempo['eventos_respondidos']} de {tiempo['eventos_totales']}")
+
+        # Explicación
+        if tiempo['tiempos']:
+            delays_str = ", ".join([str(t) for t in sorted(tiempo['tiempos'])])
+            st.caption(
+                f"Delay (en meses) entre el inicio de cada evento y la primera "
+                f"resolución declarada: **{delays_str}**"
+            )
+        else:
+            st.warning("⚠️ Ningún evento de sequía tuvo respuesta estatal dentro de los 6 meses posteriores.")
+    else:
+        st.info("ℹ️ No se detectaron eventos de sequía en este departamento para calcular el tiempo de respuesta.")
 
     with st.expander("ℹ️ ¿Cómo interpretar esta matriz?"):
         total = VP + FN + FP + VN
         st.markdown(f"""
         **Departamento analizado:** {depto_sel} ({prov_sel})  
+        **Estadístico:** {estadistico_mc}  
         **Umbral de sequía:** 6 (valor acumulado trimestral)  
         **Ventana de respuesta:** mismo mes o hasta 1 mes después  
         **Total de meses evaluados:** {total}
@@ -848,10 +990,12 @@ if resultado_mc_depto:
         | · **VN** (Verdaderos Negativos) | Ni evento ni resolución | {VN} |
 
         **Métricas:**
-        - **Exactitud** = (VP+VN) / Total: % de meses correctamente clasificados.
-        - **Precisión** = VP / (VP+FP): cuando el Estado respondió, ¿acertó?
-        - **Sensibilidad** = VP / (VP+FN): cuando hubo sequía, ¿el Estado respondió?
-        - **Especificidad** = VN / (VN+FP): cuando no hubo sequía, ¿el Estado se abstuvo?
+        - **Exactitud** = (VP+VN) / Total
+        - **Precisión** = VP / (VP+FP)
+        - **Sensibilidad** = VP / (VP+FN)
+        - **Especificidad** = VN / (VN+FP)
+
+        **Tiempo de respuesta:** delay entre el inicio del evento y la primera resolución (en meses).
         """)
 else:
     st.info("ℹ️ No hay datos suficientes para calcular la matriz en este departamento.")
@@ -865,18 +1009,27 @@ with st.expander("📊 Análisis global por provincia (clic para abrir)", expand
         "**Umbral de sequía = 6**, **ventana de respuesta = 1 mes**."
     )
 
+    estadistico_global = st.radio(
+        "Estadístico para el análisis global:",
+        ["Mediana", "Máximo"],
+        horizontal=True,
+        key="estadistico_global",
+    )
+
     @st.cache_data
-    def calcular_matrices_provincias(_df_med, _df_eme, _periodos_med, _periodos_eme,
-                                      umbral=6, delay=1):
-        """Calcula las matrices por provincia. Usa precalculadas si están disponibles."""
-        if df_mc_depto_precalc is not None:
-            df = df_mc_depto_precalc.copy()
+    def calcular_matrices_provincias(_estadistico):
+        """Devuelve las matrices por provincia (usa precalculadas si están disponibles)."""
+        if _estadistico == "Mediana" and df_mc_depto_med is not None:
+            df = df_mc_depto_med.copy()
+        elif _estadistico == "Máximo" and df_mc_depto_max is not None:
+            df = df_mc_depto_max.copy()
         else:
+            df_src = df_med if _estadistico == "Mediana" else df_max
             resultados = []
-            for key in _df_med['_key'].unique():
-                r = matriz_confusion_depto(key, _df_med, _df_eme,
-                                           _periodos_med, _periodos_eme,
-                                           umbral=umbral, delay=delay)
+            for key in df_src['_key'].unique():
+                r = matriz_confusion_depto(key, df_src, df_eme,
+                                           periodos_med, periodos_eme,
+                                           umbral=6, delay=1)
                 if r:
                     resultados.append(r)
             df = pd.DataFrame([{
@@ -892,7 +1045,6 @@ with st.expander("📊 Análisis global por provincia (clic para abrir)", expand
             FP=('FP', 'sum'), VN=('VN', 'sum'),
         ).reset_index()
 
-        # Calcular métricas por provincia
         def calc(r):
             m = calcular_metricas(r['VP'], r['FN'], r['FP'], r['VN'])
             return pd.Series({
@@ -907,9 +1059,7 @@ with st.expander("📊 Análisis global por provincia (clic para abrir)", expand
                                       na_position='last').reset_index(drop=True)
         return df_prov
 
-    df_prov = calcular_matrices_provincias(
-        df_med, df_eme, periodos_med, periodos_eme, umbral=6, delay=1
-    )
+    df_prov = calcular_matrices_provincias(estadistico_global)
 
     # ─── Tabla resumen ─────────────────────────────────────────────
     st.markdown("### Resumen por provincia")
@@ -921,7 +1071,7 @@ with st.expander("📊 Análisis global por provincia (clic para abrir)", expand
     # ─── Grilla de matrices por provincia ──────────────────────────
     st.markdown("### Matrices de confusión por provincia")
     n = len(df_prov)
-    ncols = 3
+    ncols = 2
     nrows = (n + ncols - 1) // ncols
 
     for r in range(nrows):
@@ -934,8 +1084,8 @@ with st.expander("📊 Análisis global por provincia (clic para abrir)", expand
                     fig_p = matriz_confusion_plotly(
                         int(row['VP']), int(row['FN']),
                         int(row['FP']), int(row['VN']),
-                        titulo=f"{row['PROVINCIA']}  (n={row['N_DEPARTAMENTOS']})",
-                        height=340,
+                        titulo=f"{row['PROVINCIA']} (n={row['N_DEPARTAMENTOS']})",
+                        height=420,
                     )
                     st.plotly_chart(fig_p, use_container_width=True)
 
@@ -946,12 +1096,12 @@ with st.expander("📊 Análisis global por provincia (clic para abrir)", expand
     FP_g = int(df_prov['FP'].sum())
     VN_g = int(df_prov['VN'].sum())
 
-    col_g1, col_g2 = st.columns([1, 1])
+    col_g1, col_g2 = st.columns([1.3, 1])
     with col_g1:
         fig_global = matriz_confusion_plotly(
             VP_g, FN_g, FP_g, VN_g,
             titulo="Matriz global — todas las provincias",
-            height=380,
+            height=460,
         )
         st.plotly_chart(fig_global, use_container_width=True)
 
@@ -959,8 +1109,8 @@ with st.expander("📊 Análisis global por provincia (clic para abrir)", expand
         st.markdown("**Métricas globales**")
         m_g = calcular_metricas(VP_g, FN_g, FP_g, VN_g)
         st.metric("Total departamentos", df_prov['N_DEPARTAMENTOS'].sum())
-        st.metric("Exactitud", f"{m_g['EXACTITUD']:.1%}" if pd.notna(m_g['EXACTITUD']) else "—")
-        st.metric("Precisión", f"{m_g['PRECISIÓN']:.1%}" if pd.notna(m_g['PRECISIÓN']) else "—")
-        st.metric("Sensibilidad", f"{m_g['SENSIBILIDAD']:.1%}" if pd.notna(m_g['SENSIBILIDAD']) else "—")
+        st.metric("Exactitud",     f"{m_g['EXACTITUD']:.1%}"     if pd.notna(m_g['EXACTITUD'])     else "—")
+        st.metric("Precisión",     f"{m_g['PRECISIÓN']:.1%}"     if pd.notna(m_g['PRECISIÓN'])     else "—")
+        st.metric("Sensibilidad",  f"{m_g['SENSIBILIDAD']:.1%}"  if pd.notna(m_g['SENSIBILIDAD'])  else "—")
         st.metric("Especificidad", f"{m_g['ESPECIFICIDAD']:.1%}" if pd.notna(m_g['ESPECIFICIDAD']) else "—")
 
