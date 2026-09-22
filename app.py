@@ -238,7 +238,7 @@ def matriz_confusion_plotly(VP, FN, FP, VN, titulo="Matriz de confusión", heigh
     Dibuja la matriz de confusión con:
       - Modo combinado: valor absoluto + porcentaje sobre el total
       - Paleta semáforo pastel (verde=bueno, rojo=malo, naranja=alerta)
-      - Fuentes grandes
+      - Textos con quiebre de línea y tamaños balanceados
     """
     fig = go.Figure()
 
@@ -261,11 +261,12 @@ def matriz_confusion_plotly(VP, FN, FP, VN, titulo="Matriz de confusión", heigh
     color_VN = color_semaforo((140, 200, 140), VN)   # verde claro
 
     # Definir celdas: (x0, x1, y0, y1, valor, etiqueta, color)
+    # Etiquetas con <br> para que queden en dos líneas
     celdas = [
-        (-0.5, 0.5, -0.5, 0.5, VP, "Verdaderos Positivos<br>(VP)", color_VP),
-        ( 0.5, 1.5, -0.5, 0.5, FN, "Falsos Negativos<br>(FN)", color_FN),
-        (-0.5, 0.5,  0.5, 1.5, FP, "Falsos Positivos<br>(FP)", color_FP),
-        ( 0.5, 1.5,  0.5, 1.5, VN, "Verdaderos Negativos<br>(VN)", color_VN),
+        (-0.5, 0.5, -0.5, 0.5, VP, "Verdaderos<br>Positivos", color_VP),
+        ( 0.5, 1.5, -0.5, 0.5, FN, "Falsos<br>Negativos", color_FN),
+        (-0.5, 0.5,  0.5, 1.5, FP, "Falsos<br>Positivos", color_FP),
+        ( 0.5, 1.5,  0.5, 1.5, VN, "Verdaderos<br>Negativos", color_VN),
     ]
 
     for x0, x1, y0, y1, valor, etiqueta, color in celdas:
@@ -276,50 +277,49 @@ def matriz_confusion_plotly(VP, FN, FP, VN, titulo="Matriz de confusión", heigh
             layer='below',
         )
         pct = valor / total * 100
-        # Texto: etiqueta arriba, valor grande, porcentaje abajo
+        # Texto: etiqueta · valor · porcentaje (tamaños balanceados)
         texto = (
-            f"<span style='font-size:16px'>{etiqueta}</span>"
-            f"<br><b style='font-size:34px'>{valor}</b>"
-            f"<br><span style='font-size:16px'>({pct:.1f}%)</span>"
+            f"<span style='font-size:13px'>{etiqueta}</span>"
+            f"<br><span style='font-size:22px'>{valor}</span>"
+            f"<br><span style='font-size:12px'>({pct:.1f}%)</span>"
         )
         fig.add_annotation(
             x=(x0 + x1) / 2, y=(y0 + y1) / 2,
             text=texto,
             showarrow=False,
-            font=dict(size=16, color='black'),
+            font=dict(size=13, color='black'),
             align='center',
         )
 
     fig.update_xaxes(
         tickvals=[0, 1],
-        ticktext=['Hay respuesta', 'No hay respuesta'],
+        ticktext=['Hay<br>respuesta', 'No hay<br>respuesta'],
         range=[-0.5, 1.5],
         side='top',
         showgrid=False,
         zeroline=False,
-        tickfont=dict(size=15),
+        tickfont=dict(size=12),
     )
     fig.update_yaxes(
         tickvals=[0, 1],
-        ticktext=['Hay evento', 'No hay evento'],
+        ticktext=['Hay<br>evento', 'No hay<br>evento'],
         range=[1.5, -0.5],
         showgrid=False,
         zeroline=False,
-        tickfont=dict(size=15),
+        tickfont=dict(size=12),
     )
 
     fig.update_layout(
         title=dict(text=titulo, x=0.5, xanchor='center',
-                   font=dict(size=18)),
+                   font=dict(size=15)),
         height=height,
-        margin=dict(l=140, r=30, t=90, b=30),
+        margin=dict(l=110, r=20, t=80, b=20),
         plot_bgcolor='white',
         showlegend=False,
     )
 
     return fig
-
-
+    
 # ─────────────────────────────────────────────────────────────────────
 # CARGA DE DATOS (CSV)
 # ─────────────────────────────────────────────────────────────────────
